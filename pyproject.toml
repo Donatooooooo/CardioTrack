@@ -1,0 +1,42 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "predicting_outcomes_in_heart_failure"
+version = "0.0.1"
+description = "This project develops a predictive pipeline for patient outcome prediction in heart failure, using a publicly available dataset of clinical records. The goal is to design and evaluate machine learning models within a reproducible workflow that can be integrated into larger systems for clinical decision support. The workflow addresses data heterogeneity, defines consistent preprocessing and feature engineering strategies, and explores alternative modeling approaches with systematic evaluation using clinically relevant metrics. It also emphasizes model transparency and auditability, ensuring that the resulting pipeline can be deployed as a reliable, adaptable software component in healthcare applications. The project aims not only to improve baseline predictive performance but also to demonstrate how data-driven models can be effectively integrated into end-to-end AI-enabled healthcare systems."
+authors = [
+  { name = "CardioTrack" },
+]
+
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    
+]
+dependencies = [
+    "loguru",
+    "mkdocs",
+    "pip",
+    "pytest",
+    "python-dotenv",
+    "ruff",
+    "tqdm",
+    "typer",
+]
+requires-python = "~=3.11.0"
+
+
+[tool.ruff]
+line-length = 99
+src = ["predicting_outcomes_in_heart_failure"]
+include = ["pyproject.toml", "predicting_outcomes_in_heart_failure/**/*.py"]
+
+[tool.ruff.lint]
+extend-select = ["I"]  # Add import sorting
+
+[tool.ruff.lint.isort]
+known-first-party = ["predicting_outcomes_in_heart_failure"]
+force-sort-within-sections = true
+
