@@ -46,7 +46,7 @@ New patient data collected through standardized clinical protocols will periodic
 
 ## **5. Data Sources**
 
-The ML system will rely on a **publicly available dataset** that includes clinical parameters from both healthy individuals and patients diagnosed with heart failure.  
+Cardio Track ML system will rely on a **publicly available dataset** that includes clinical parameters from both healthy individuals and patients diagnosed with heart failure.
 The reference dataset is the [Heart Failure Prediction Dataset](https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction).
 
 ---
@@ -76,6 +76,7 @@ Cardio Track ML system will use a **single main model** in production.
 Model updates will occur periodically as new data is integrated, or when a new version demonstrates statistically significant improvements in key metrics: **F1-score**, **recall**, **accuracy**, and **ROC-AUC**.
 
 Model explainability will be ensured through the analysis of feature importance. Feature impact will be quantified by observing charts, allowing medical experts to interpret and validate the relevance of clinical factors used in the decision process.
+
 ---
 
 ## **9. Features**
