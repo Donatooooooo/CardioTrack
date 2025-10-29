@@ -1,0 +1,19 @@
+stages:
+  download_data:
+    cmd: uv run predicting_outcomes_in_heart_failure\data\dataset.py
+    deps:
+    - predicting_outcomes_in_heart_failure\data\dataset.py
+    outs:
+    - data/raw/heart.csv
+  preprocessing:
+    cmd: uv run predicting_outcomes_in_heart_failure\data\preprocess.py
+    deps:
+    - predicting_outcomes_in_heart_failure\data\preprocess.py
+    outs:
+    - data\interim\preprocessed.csv
+  split_data:
+    cmd: uv run predicting_outcomes_in_heart_failure\data\split_data.py
+    deps:
+    - predicting_outcomes_in_heart_failure\data\split_data.py
+    outs:
+    - data\processed
