@@ -35,4 +35,5 @@ stages:
     cmd: uv run predicting_outcomes_in_heart_failure/modeling/evaluate.py
     deps: 
     - predicting_outcomes_in_heart_failure/modeling/evaluate.py
+    - data/processed/test.csv
     - models
