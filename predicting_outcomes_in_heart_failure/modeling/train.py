@@ -10,7 +10,8 @@ from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
 from predicting_outcomes_in_heart_failure.config import (
     MODELS_DIR, TARGET_COL, RANDOM_STATE, N_SPLITS, 
-    SCORING,TRAIN_CSV, REPORTS_DIR, EXPERIMENT_NAME, DATASET_NAME
+    SCORING,TRAIN_CSV, REPORTS_DIR, EXPERIMENT_NAME, DATASET_NAME,
+    CONFIG_DT, CONFIG_RF, CONFIG_LR, REPO_NAME, REPO_OWNER
 )
 
 REFIT = "f1"
@@ -29,27 +30,19 @@ def get_model_and_grid(model_name: str):
     if model_name == "decision_tree":
         from sklearn.tree import DecisionTreeClassifier
         estimator = DecisionTreeClassifier(random_state=RANDOM_STATE)
-        param_grid = {
-            "criterion": ["gini", "entropy", "log_loss"],
-            "max_depth": [None, 3, 5, 7, 9, 12],
-            "min_samples_split": [2, 5, 10, 20],
-            "min_samples_leaf": [1, 2, 4, 8],
-            "max_features": [None, "sqrt", "log2"],
-            "class_weight": [None, "balanced"],
-            "ccp_alpha": [0.0, 0.001, 0.01],
-        }
+        param_grid = CONFIG_DT
         return estimator, param_grid
 
     elif model_name == "logreg":
         from sklearn.linear_model import LogisticRegression
         estimator = LogisticRegression(max_iter=500, random_state=RANDOM_STATE)
-        param_grid = {"C": [0.01, 0.1, 1, 10], "penalty": ["l2"], "class_weight": [None, "balanced"]}
+        param_grid = CONFIG_LR
         return estimator, param_grid
 
     elif model_name == "random_forest":
         from sklearn.ensemble import RandomForestClassifier
         estimator = RandomForestClassifier(random_state=RANDOM_STATE)
-        param_grid = {"n_estimators": [200, 400, 800], "max_depth": [None, 6, 12], "class_weight": [None, "balanced"]}
+        param_grid = CONFIG_RF
         return estimator, param_grid
 
     else:
@@ -126,21 +119,19 @@ def train(model_name : str):
         X_train = train_df.drop(columns=[TARGET_COL])
         y_train = train_df[TARGET_COL].astype(int)
 
-        # 2) Model & Grid
         estimator, param_grid = get_model_and_grid(model_name)
         mlflow.set_tag("estimator_name", estimator.__class__.__name__)
 
         model_dir = REPORTS_DIR / model_name
         model_dir.mkdir(parents = True, exist_ok=True)
 
-        # 3) GridSearchCV
         best_model, grid, params = run_grid_search(estimator, param_grid, X_train, y_train, model_name)
         mlflow.log_params(params)
         
         save_artifacts(best_model, grid, X_train, model_name)
 
 def main():
-    dagshub.init(repo_owner='donatooooooo', repo_name='MLflow_Server', mlflow=True)
+    dagshub.init(repo_owner = REPO_OWNER, repo_name = REPO_NAME, mlflow=True)
     
     for model in ["logreg", "random_forest", "decision_tree"]:
         train(model)
