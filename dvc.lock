@@ -1,0 +1,39 @@
+schema: '2.0'
+stages:
+  download_data:
+    cmd: uv run predicting_outcomes_in_heart_failure\data\dataset.py
+    deps:
+    - path: predicting_outcomes_in_heart_failure\data\dataset.py
+      hash: md5
+      md5: e0b21a3b69901484b3ef6279e8ab5ad9
+      size: 575
+    outs:
+    - path: data/raw/heart.csv
+      hash: md5
+      md5: ab21f2524241ed14b321bcaf40c8b86e
+      size: 35921
+  preprocessing:
+    cmd: uv run predicting_outcomes_in_heart_failure\data\preprocess.py
+    deps:
+    - path: predicting_outcomes_in_heart_failure\data\preprocess.py
+      hash: md5
+      md5: 9fa31deb5c82027c30cccad3a0aa2ce7
+      size: 2844
+    outs:
+    - path: data\interim\preprocessed.csv
+      hash: md5
+      md5: aeb0353e39e219cf0b574ab72b08ac26
+      size: 151228
+  split_data:
+    cmd: uv run predicting_outcomes_in_heart_failure\data\split_data.py
+    deps:
+    - path: predicting_outcomes_in_heart_failure\data\split_data.py
+      hash: md5
+      md5: 948bdf1941ddf6b2f3952ac95ecf85b3
+      size: 2194
+    outs:
+    - path: data\processed
+      hash: md5
+      md5: 7809f68c8d582ea4f49135f432bab71f.dir
+      size: 149721
+      nfiles: 2

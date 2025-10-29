@@ -16,12 +16,21 @@ classifiers = [
     
 ]
 dependencies = [
+    "asttokens>=3.0.0",
+    "imbalanced-learn>=0.14.0",
+    "ipykernel>=7.1.0",
+    "kagglehub>=0.3.13",
     "loguru",
+    "matplotlib>=3.10.7",
     "mkdocs",
+    "numpy>=2.3.4",
+    "pandas>=2.3.3",
     "pip",
     "pytest",
     "python-dotenv",
     "ruff",
+    "scikit-learn>=1.7.2",
+    "seaborn>=0.13.2",
     "tqdm",
     "typer",
 ]
