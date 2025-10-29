@@ -1,8 +1,12 @@
 from sklearn.metrics import (
     accuracy_score, f1_score, recall_score, roc_auc_score
 )
+
 from loguru import logger
-from predicting_outcomes_in_heart_failure.config import MODELS_DIR, TARGET_COL, TEST_CSV, EXPERIMENT_NAME
+from predicting_outcomes_in_heart_failure.config import (
+    MODELS_DIR, TARGET_COL, TEST_CSV, EXPERIMENT_NAME, REPO_OWNER, REPO_NAME
+)
+
 from train import load_split
 import os, joblib
 import dagshub, mlflow
@@ -54,6 +58,6 @@ def evaluate():
                         logger.info(f"  - {k}: {metrics[k]:.4f}")
                     
 if __name__ == "__main__":
-    dagshub.init(repo_owner='donatooooooo', repo_name='MLflow_Server', mlflow=True)
+    dagshub.init(repo_owner = REPO_OWNER, repo_name = REPO_NAME, mlflow=True)
     evaluate()
     logger.success("Evaluation completed.")
