@@ -17,12 +17,14 @@ classifiers = [
 ]
 dependencies = [
     "asttokens>=3.0.0",
+    "dagshub>=0.6.3",
     "imbalanced-learn>=0.14.0",
     "ipykernel>=7.1.0",
     "kagglehub>=0.3.13",
     "loguru",
     "matplotlib>=3.10.7",
     "mkdocs",
+    "mlflow==2.22.0",
     "numpy>=2.3.4",
     "pandas>=2.3.3",
     "pip",
