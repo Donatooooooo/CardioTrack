@@ -5,8 +5,8 @@ stages:
     deps:
     - path: predicting_outcomes_in_heart_failure\data\dataset.py
       hash: md5
-      md5: e0b21a3b69901484b3ef6279e8ab5ad9
-      size: 575
+      md5: 4ba3b91d18579d111c33a487386050f8
+      size: 563
     outs:
     - path: data/raw/heart.csv
       hash: md5
@@ -17,8 +17,8 @@ stages:
     deps:
     - path: predicting_outcomes_in_heart_failure\data\preprocess.py
       hash: md5
-      md5: 9fa31deb5c82027c30cccad3a0aa2ce7
-      size: 2844
+      md5: 7fbf5adaf6c84eab1e931beffbf597c8
+      size: 2920
     outs:
     - path: data\interim\preprocessed.csv
       hash: md5
@@ -29,11 +29,62 @@ stages:
     deps:
     - path: predicting_outcomes_in_heart_failure\data\split_data.py
       hash: md5
-      md5: 948bdf1941ddf6b2f3952ac95ecf85b3
-      size: 2194
+      md5: 068ee60f2ab294944d3392ef6aa033e5
+      size: 2262
     outs:
     - path: data\processed
       hash: md5
       md5: 7809f68c8d582ea4f49135f432bab71f.dir
       size: 149721
       nfiles: 2
+  training:
+    cmd: uv run predicting_outcomes_in_heart_failure\modeling\train.py
+    deps:
+    - path: data\processed\train.csv
+      hash: md5
+      md5: c7af893630cff97ccd3ce364ed1ee6eb
+      size: 104547
+    - path: predicting_outcomes_in_heart_failure\modeling\train.py
+      hash: md5
+      md5: 121864ab88b115e91e1f32c26ac5236b
+      size: 5271
+    outs:
+    - path: models\decision_tree.joblib
+      hash: md5
+      md5: 2277d8f53277419bf3594d2b2dd6c8b5
+      size: 5561
+    - path: models\logreg.joblib
+      hash: md5
+      md5: 111daa40218a6671c65ff070331a660d
+      size: 1519
+    - path: models\random_forest.joblib
+      hash: md5
+      md5: 9238e908d69868896621b6fc022fc9a0
+      size: 12908329
+    - path: reports\decision_tree\
+      hash: md5
+      md5: 1ed4e6ef66488a6625b9bff95a6a0936.dir
+      size: 6779939
+      nfiles: 2
+    - path: reports\logreg\
+      hash: md5
+      md5: 97f0316495eadf3e8e5b63b357384fe3.dir
+      size: 11517
+      nfiles: 2
+    - path: reports\random_forest\
+      hash: md5
+      md5: 79796f5f0495a7fba1fb033ea019e742.dir
+      size: 18765
+      nfiles: 2
+  evaluation:
+    cmd: uv run predicting_outcomes_in_heart_failure\modeling\evaluate.py
+    deps:
+    - path: models\
+      hash: md5
+      md5: 9d710f0dc19cd6bf1334d2c77891d1cd.dir
+      size: 12915471
+      nfiles: 5
+    - path: predicting_outcomes_in_heart_failure\modeling\evaluate.py
+      hash: md5
+      md5: bb3cbd5ae3aeb2525f1f8158fbe805dc
+      size: 2359

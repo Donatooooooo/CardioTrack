@@ -17,3 +17,20 @@ stages:
     - predicting_outcomes_in_heart_failure\data\split_data.py
     outs:
     - data\processed
+  training:
+    cmd: uv run predicting_outcomes_in_heart_failure\modeling\train.py
+    deps:
+    - predicting_outcomes_in_heart_failure\modeling\train.py
+    - data\processed\train.csv
+    outs:
+    - models\decision_tree.joblib
+    - models\random_forest.joblib
+    - models\logreg.joblib
+    - reports\decision_tree\
+    - reports\random_forest\
+    - reports\logreg\
+  evaluation:
+    cmd: uv run predicting_outcomes_in_heart_failure\modeling\evaluate.py
+    deps: 
+    - predicting_outcomes_in_heart_failure\modeling\evaluate.py
+    - models\
