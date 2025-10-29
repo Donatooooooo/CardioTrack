@@ -1,23 +1,19 @@
 from __future__ import annotations
 from pathlib import Path
-import json
-import joblib
-import numpy as np
+import joblib, json
 import pandas as pd
+import dagshub, mlflow
+import os
+
 from loguru import logger
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
-from sklearn.metrics import (
-    accuracy_score, f1_score, recall_score, roc_auc_score, confusion_matrix
-)
-import matplotlib.pyplot as plt
+
 from predicting_outcomes_in_heart_failure.config import (
-    MODELS_DIR, REPORTS_DIR, FIGURES_DIR, TARGET_COL, 
-    RANDOM_STATE, N_SPLITS, SCORING,TRAIN_CSV, TEST_CSV, 
+    MODELS_DIR, TARGET_COL, RANDOM_STATE, N_SPLITS, 
+    SCORING,TRAIN_CSV, REPORTS_DIR, EXPERIMENT_NAME, DATASET_NAME
 )
 
 REFIT = "f1"
-MODEL_NAME = "random_forest"  # es: "decision_tree", "logreg", "random_forest"
-
 
 
 def load_split(path: Path) -> pd.DataFrame:
@@ -60,7 +56,7 @@ def get_model_and_grid(model_name: str):
         raise ValueError(f"Unknown model_name: {model_name}")
 
 
-def run_grid_search(estimator, param_grid, X_train, y_train):
+def run_grid_search(estimator, param_grid, X_train, y_train, model_name):
     cv = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_STATE)
     grid = GridSearchCV(
         estimator=estimator,
@@ -72,70 +68,29 @@ def run_grid_search(estimator, param_grid, X_train, y_train):
         verbose=1,
         return_train_score=True,
     )
-    logger.info(f"Starting GridSearchCV for {MODEL_NAME} …")
+    logger.info(f"Starting GridSearchCV for {model_name} …")
     grid.fit(X_train, y_train)
+    
     logger.success("GridSearchCV completed.")
     logger.info(f"Best params ({REFIT}): {grid.best_params_}")
     logger.info(f"Best CV {REFIT}: {grid.best_score_:.4f}")
-    return grid.best_estimator_, grid
+    
+    cv_results = Path(REPORTS_DIR / model_name / "cv_results.json")
+    df = pd.DataFrame(grid.cv_results_)
+    df.to_csv(cv_results, index=False)
+    
+    mlflow.log_artifact(cv_results)
+    return grid.best_estimator_, grid, grid.best_params_
 
 
-def evaluate_metrics(model, X_test, y_test) -> dict:
-    y_pred = model.predict(X_test)
-    results = {
-        "test_f1": f1_score(y_test, y_pred, zero_division=0),
-        "test_recall": recall_score(y_test, y_pred, zero_division=0),
-        "test_accuracy": accuracy_score(y_test, y_pred),
-    }
-    if hasattr(model, "predict_proba"):
-        try:
-            y_prob = model.predict_proba(X_test)[:, 1]
-            results["test_roc_auc"] = roc_auc_score(y_test, y_prob)
-        except Exception as e:
-            logger.warning(f"ROC AUC not computed: {e}")
-    return results, y_pred
-
-
-def save_confusion_matrix(y_true, y_pred, labels: list[str] | None = None) -> Path:
-    cm = confusion_matrix(y_true, y_pred)
-    fig_path = FIGURES_DIR / f"{MODEL_NAME}_confusion_matrix.png"
-
-    plt.figure()
-    plt.imshow(cm, interpolation="nearest")
-    plt.title("Confusion Matrix")
-    plt.xlabel("Predicted label")
-    plt.ylabel("True label")
-    if labels is None:
-        labels = ["0", "1"]
-    ticks = np.arange(len(labels))
-    plt.xticks(ticks, labels)
-    plt.yticks(ticks, labels)
-
-    thresh = cm.max() / 2.0
-    for i in range(cm.shape[0]):
-        for j in range(cm.shape[1]):
-            plt.text(
-                j, i, format(cm[i, j], "d"),
-                ha="center", va="center",
-                color="white" if cm[i, j] > thresh else "black"
-            )
-
-    plt.tight_layout()
-    plt.savefig(fig_path, dpi=150)
-    plt.close()
-    logger.success(f"Saved confusion matrix → {fig_path}")
-    return fig_path
-
-
-def save_artifacts(model, grid, X_train, y_test, y_pred, metrics: dict) -> None:
-    model_path   = MODELS_DIR / f"{MODEL_NAME}.joblib"
-    metrics_path = REPORTS_DIR / f"{MODEL_NAME}_metrics.json"
-
+def save_artifacts(model, grid, X_train, model_name) -> None:
+    model_path   = MODELS_DIR / f"{model_name}.joblib"
+    
     joblib.dump(model, model_path)
     logger.success(f"Saved model → {model_path}")
 
     out = {
-        "model_name": MODEL_NAME,
+        "model_name": model_name,
         "cv": {
             "refit": REFIT,
             "best_score": getattr(grid, "best_score_", None),
@@ -144,51 +99,52 @@ def save_artifacts(model, grid, X_train, y_test, y_pred, metrics: dict) -> None:
             "n_splits": N_SPLITS,
             "random_state": RANDOM_STATE,
         },
-        "test": {
-            **metrics,
-            "y_true_counts": pd.Series(y_test).value_counts().to_dict(),
-            "y_pred_counts": pd.Series(y_pred).value_counts().to_dict(),
-        },
         "features": list(X_train.columns),
     }
 
-    with open(metrics_path, "w", encoding="utf-8") as f:
-        json.dump(out, f, indent=2)
-    logger.success(f"Saved metrics → {metrics_path}")
+    cv_params = Path(REPORTS_DIR / model_name / "cv_parameters.json")
+    with open(REPORTS_DIR / cv_params, "w") as f:
+        json.dump(out, f, indent=4)
+    
+    mlflow.log_artifact(cv_params)
+    logger.success(f"Saved artifacts")
 
+
+def train(model_name : str):
+    if not mlflow.get_experiment_by_name(EXPERIMENT_NAME):
+        mlflow.create_experiment(EXPERIMENT_NAME)
+    mlflow.set_experiment(EXPERIMENT_NAME)
+    
+    logger.info(f"=== Training pipeline started (model={model_name}) ===")
+
+    with mlflow.start_run(run_name = model_name):
+        train_df = load_split(TRAIN_CSV)
+        
+        rawdata = mlflow.data.from_pandas(train_df, name = DATASET_NAME)
+        mlflow.log_input(rawdata, context="training")
+
+        X_train = train_df.drop(columns=[TARGET_COL])
+        y_train = train_df[TARGET_COL].astype(int)
+
+        # 2) Model & Grid
+        estimator, param_grid = get_model_and_grid(model_name)
+        mlflow.set_tag("estimator_name", estimator.__class__.__name__)
+
+        model_dir = REPORTS_DIR / model_name
+        model_dir.mkdir(parents = True, exist_ok=True)
+
+        # 3) GridSearchCV
+        best_model, grid, params = run_grid_search(estimator, param_grid, X_train, y_train, model_name)
+        mlflow.log_params(params)
+        
+        save_artifacts(best_model, grid, X_train, model_name)
 
 def main():
-    logger.info(f"=== Training pipeline started (model={MODEL_NAME}) ===")
-
-    # 1) Load data
-    train_df = load_split(TRAIN_CSV)
-    test_df  = load_split(TEST_CSV)
-
-    X_train = train_df.drop(columns=[TARGET_COL])
-    y_train = train_df[TARGET_COL].astype(int)
-    X_test  = test_df.drop(columns=[TARGET_COL])
-    y_test  = test_df[TARGET_COL].astype(int)
-
-    # 2) Model & Grid
-    estimator, param_grid = get_model_and_grid(MODEL_NAME)
-
-    # 3) GridSearchCV
-    best_model, grid = run_grid_search(estimator, param_grid, X_train, y_train)
-
-    # 4) Evaluate
-    metrics, y_pred = evaluate_metrics(best_model, X_test, y_test)
-    logger.info("Test set metrics:")
-    for k in ["test_f1", "test_recall", "test_accuracy", "test_roc_auc"]:
-        if k in metrics:
-            logger.info(f"  - {k}: {metrics[k]:.4f}")
-
-    save_confusion_matrix(y_test, y_pred, labels=["0", "1"])
-
-    # 6) Save artifacts
-    save_artifacts(best_model, grid, X_train, y_test, y_pred, metrics)
-
+    dagshub.init(repo_owner='donatooooooo', repo_name='MLflow_Server', mlflow=True)
+    
+    for model in ["logreg", "random_forest", "decision_tree"]:
+        train(model)
     logger.success("Training pipeline completed.")
-
 
 if __name__ == "__main__":
     main()
