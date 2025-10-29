@@ -4,7 +4,7 @@ from sklearn.metrics import (
 
 from loguru import logger
 from predicting_outcomes_in_heart_failure.config import (
-    MODELS_DIR, TARGET_COL, TEST_CSV, EXPERIMENT_NAME, REPO_OWNER, REPO_NAME
+    MODELS_DIR, TARGET_COL, TEST_CSV, EXPERIMENT_NAME, REPO_OWNER, REPO_NAME, DATASET_NAME
 )
 
 from mlflow.models.signature import infer_signature
@@ -48,6 +48,9 @@ def evaluate():
             
             tracked_id = runs.loc[0, "run_id"]
             with mlflow.start_run(run_id = tracked_id):
+                rawdata = mlflow.data.from_pandas(test_df, name = DATASET_NAME)
+                mlflow.log_input(rawdata, context="testing")
+                
                 model_path = os.path.join(MODELS_DIR, file)
                 model = joblib.load(model_path)
                 metrics, _ = compute_metrics(model, X_test, y_test)
