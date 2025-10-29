@@ -7,6 +7,7 @@ from predicting_outcomes_in_heart_failure.config import (
     MODELS_DIR, TARGET_COL, TEST_CSV, EXPERIMENT_NAME, REPO_OWNER, REPO_NAME
 )
 
+from mlflow.models.signature import infer_signature
 from train import load_split
 import os, joblib
 import dagshub, mlflow
@@ -56,7 +57,22 @@ def evaluate():
                 for k in ["test_f1", "test_recall", "test_accuracy", "test_roc_auc"]:
                     if k in metrics:
                         logger.info(f"  - {k}: {metrics[k]:.4f}")
-                    
+
+                if (
+                    metrics["test_f1"] >= 0.80
+                    and metrics["test_recall"] >= 0.80
+                    and metrics["test_accuracy"] >= 0.80
+                    and metrics["test_roc_auc"] >= 0.85
+                ):
+                    signature = infer_signature(X_test, model.predict(X_test))
+                    mlflow.sklearn.log_model(
+                        sk_model=model,
+                        artifact_path="Model_Info",
+                        signature=signature,
+                        input_example=X_test,
+                        registered_model_name=model_name
+                    )
+
 if __name__ == "__main__":
     dagshub.init(repo_owner = REPO_OWNER, repo_name = REPO_NAME, mlflow=True)
     evaluate()
