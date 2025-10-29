@@ -17,9 +17,9 @@ RAW_DATA_DIR = DATA_DIR / "raw"
 EXTERNAL_DATA_DIR = DATA_DIR / "external"
  
 RAW_PATH = RAW_DATA_DIR / "heart.csv"
-PREPROCESSED_CSV = PROCESSED_DATA_DIR / "preprocessed.csv"
-TRAIN_CSV = INTERIM_DATA_DIR / "train.csv"
-TEST_CSV  = INTERIM_DATA_DIR / "test.csv"
+PREPROCESSED_CSV = INTERIM_DATA_DIR / "preprocessed.csv"
+TRAIN_CSV = PROCESSED_DATA_DIR / "train.csv"
+TEST_CSV  = PROCESSED_DATA_DIR / "test.csv"
  
 MODELS_DIR  = PROJ_ROOT / "models"
 REPORTS_DIR = PROJ_ROOT / "reports"

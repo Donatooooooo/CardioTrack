@@ -1,9 +1,9 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from loguru import logger
-from config import (
+from predicting_outcomes_in_heart_failure.config import(
     PREPROCESSED_CSV,
-    INTERIM_DATA_DIR,
+    PROCESSED_DATA_DIR,
     TRAIN_CSV,
     TEST_CSV,
     TARGET_COL,
@@ -64,5 +64,5 @@ def split():
 
 
 if __name__ == "__main__":
-    INTERIM_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
     split()

@@ -1,11 +1,11 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from loguru import logger
-from config import (
+from predicting_outcomes_in_heart_failure.config import(
     TARGET_COL, RAW_PATH, 
     PREPROCESSED_CSV, 
     NUM_COLS_DEFAULT,
-    PROCESSED_DATA_DIR
+    INTERIM_DATA_DIR
 )
 
    
@@ -72,5 +72,5 @@ def preprocessing():
 
 
 if __name__ == "__main__":
-    PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    INTERIM_DATA_DIR.mkdir(parents=True, exist_ok=True)
     preprocessing()
