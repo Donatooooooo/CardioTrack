@@ -1,4 +1,4 @@
-# predicting_outcomes_in_heart_failure
+# Predicting Outcomes in Heart Failure
 
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
@@ -45,7 +45,11 @@ This project develops a predictive pipeline for patient outcome prediction in he
     │
     ├── config.py               <- Store useful variables and configuration
     │
-    ├── dataset.py              <- Scripts to download or generate data
+    ├── data               
+    │   ├── __init__.py 
+    │   ├── dataset.py          <- Scripts to download or generate data
+    |   ├── preprocess.py       <- Data preprocessing code 
+    │   └── split_data.py       <- Split dataset into train and test code
     │
     ├── features.py             <- Code to create features for modeling
     │
@@ -57,5 +61,34 @@ This project develops a predictive pipeline for patient outcome prediction in he
     └── plots.py                <- Code to create visualizations
 ```
 
---------
+## DVC Pipeline defined
+```
++---------------+  
+| download_data |  
++---------------+  
+        *
+        *
+        *
++---------------+  
+| preprocessing |  
++---------------+  
+        *
+        *
+        *
+  +------------+
+  | split_data |
+  +------------+
+        *
+        *
+        *
+  +----------+
+  | training |
+  +----------+
+        *
+        *
+        *
+  +------------+
+  | evaluation |
+  +------------+
+```
 
