@@ -104,7 +104,7 @@ This project develops a predictive pipeline for patient outcome prediction in he
 ## Milestones Summary
 
 ### Milestone 1 - Inception
-During this milestone, the **CCD Project Template** was used as the foundation for organizing the project.
+During this milestone, the **CCDS Project Template** was used as the foundation for organizing the project.
 The main conceptual and structural components of the system were defined, following the template guidelines to ensure consistency and traceability.
 
 Additionally, a **Machine Learning Canvas** has been added in the [`docs/`](./docs) folder.
