@@ -1,17 +1,30 @@
 from __future__ import annotations
-from pathlib import Path
-import joblib, json
-import pandas as pd
-import dagshub, mlflow
-import os
 
+import json
+from pathlib import Path
+
+import dagshub
+import joblib
 from loguru import logger
+import mlflow
+import pandas as pd
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
 from predicting_outcomes_in_heart_failure.config import (
-    MODELS_DIR, TARGET_COL, RANDOM_STATE, N_SPLITS, 
-    SCORING,TRAIN_CSV, REPORTS_DIR, EXPERIMENT_NAME, DATASET_NAME,
-    CONFIG_DT, CONFIG_RF, CONFIG_LR, REPO_NAME, REPO_OWNER
+    CONFIG_DT,
+    CONFIG_LR,
+    CONFIG_RF,
+    DATASET_NAME,
+    EXPERIMENT_NAME,
+    MODELS_DIR,
+    N_SPLITS,
+    RANDOM_STATE,
+    REPO_NAME,
+    REPO_OWNER,
+    REPORTS_DIR,
+    SCORING,
+    TARGET_COL,
+    TRAIN_CSV,
 )
 
 REFIT = "f1"
@@ -100,7 +113,7 @@ def save_artifacts(model, grid, X_train, model_name) -> None:
         json.dump(out, f, indent=4)
     
     mlflow.log_artifact(cv_params)
-    logger.success(f"Saved artifacts")
+    logger.success("Saved artifacts")
 
 
 def train(model_name : str):
@@ -125,7 +138,11 @@ def train(model_name : str):
         model_dir = REPORTS_DIR / model_name
         model_dir.mkdir(parents = True, exist_ok=True)
 
-        best_model, grid, params = run_grid_search(estimator, param_grid, X_train, y_train, model_name)
+        best_model, grid, params = run_grid_search(estimator,
+                                                   param_grid,
+                                                   X_train,
+                                                   y_train,
+                                                   model_name)
         mlflow.log_params(params)
         
         save_artifacts(best_model, grid, X_train, model_name)

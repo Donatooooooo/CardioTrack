@@ -1,8 +1,10 @@
 from pathlib import Path
+
 from loguru import logger
-import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import  confusion_matrix
+import numpy as np
+from sklearn.metrics import confusion_matrix
+
 from predicting_outcomes_in_heart_failure.config import FIGURES_DIR
 
 

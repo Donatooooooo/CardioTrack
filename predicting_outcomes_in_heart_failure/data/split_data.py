@@ -1,15 +1,15 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
 from loguru import logger
-from predicting_outcomes_in_heart_failure.config import(
+import pandas as pd
+from predicting_outcomes_in_heart_failure.config import (
     PREPROCESSED_CSV,
     PROCESSED_DATA_DIR,
-    TRAIN_CSV,
-    TEST_CSV,
-    TARGET_COL,
     RANDOM_STATE,
-    TEST_SIZE
+    TARGET_COL,
+    TEST_CSV,
+    TEST_SIZE,
+    TRAIN_CSV,
 )
+from sklearn.model_selection import train_test_split
 
 
 def split():
@@ -21,7 +21,11 @@ def split():
 
     # Load dataset
     df = pd.read_csv(PREPROCESSED_CSV)
-    logger.info(f"Loaded processed dataset: {PREPROCESSED_CSV} (rows={len(df)}, cols={df.shape[1]})")
+    logger.info(
+        "Loaded processed dataset: %s (rows=%d, cols=%d)",
+        PREPROCESSED_CSV, len(df), df.shape[1]
+    )
+
 
     # Split features and target
     X = df.drop(columns=[TARGET_COL])
@@ -45,8 +49,10 @@ def split():
     logger.info(f"Performed train/test split with test_size={TEST_SIZE}")
 
     # Recombine for saving
-    train_df = X_train.copy(); train_df[TARGET_COL] = y_train.values
-    test_df  = X_test.copy();  test_df[TARGET_COL]  = y_test.values
+    train_df = X_train.copy()
+    train_df[TARGET_COL] = y_train.values
+    test_df  = X_test.copy()
+    test_df[TARGET_COL]  = y_test.values
 
     # Save to disk
     train_df.to_csv(TRAIN_CSV, index=False)

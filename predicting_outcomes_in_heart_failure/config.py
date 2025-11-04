@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from dotenv import load_dotenv
 from loguru import logger
 
@@ -21,12 +22,14 @@ SCORING = {
 }
 
 NUM_COLS_DEFAULT = ["Age", "RestingBP", "Cholesterol", "MaxHR", "Oldpeak"]
-CAT_COLS_DEFAULT = ["Sex", "ChestPainType", "FastingBS", "RestingECG", "ExerciseAngina", "ST_Slope"]
+CAT_COLS_DEFAULT = ["Sex", "ChestPainType", "FastingBS", "RestingECG",
+                     "ExerciseAngina", "ST_Slope"]
 
 # ----------------------------
 # Model hyperparameter configurations
 # ----------------------------
-CONFIG_RF = {"n_estimators": [200, 400, 800], "max_depth": [None, 6, 12], "class_weight": [None, "balanced"]}
+CONFIG_RF = {"n_estimators": [200, 400, 800], "max_depth": [None, 6, 12],
+              "class_weight": [None, "balanced"]}
 CONFIG_DT = {
     "criterion": ["gini", "entropy", "log_loss"],
     "max_depth": [None, 3, 5, 7, 9, 12],

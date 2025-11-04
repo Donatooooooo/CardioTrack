@@ -1,16 +1,22 @@
-from sklearn.metrics import (
-    accuracy_score, f1_score, recall_score, roc_auc_score
-)
+import os
 
+import dagshub
+import joblib
 from loguru import logger
-from predicting_outcomes_in_heart_failure.config import (
-    MODELS_DIR, TARGET_COL, TEST_CSV, EXPERIMENT_NAME, REPO_OWNER, REPO_NAME, DATASET_NAME
-)
-
+import mlflow
 from mlflow.models.signature import infer_signature
+from sklearn.metrics import accuracy_score, f1_score, recall_score, roc_auc_score
 from train import load_split
-import os, joblib
-import dagshub, mlflow
+
+from predicting_outcomes_in_heart_failure.config import (
+    DATASET_NAME,
+    EXPERIMENT_NAME,
+    MODELS_DIR,
+    REPO_NAME,
+    REPO_OWNER,
+    TARGET_COL,
+    TEST_CSV,
+)
 
 
 def compute_metrics(model, X_test, y_test) -> dict:

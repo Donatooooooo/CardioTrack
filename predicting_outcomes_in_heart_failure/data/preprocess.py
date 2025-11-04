@@ -1,21 +1,21 @@
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
 from loguru import logger
-from predicting_outcomes_in_heart_failure.config import(
-    TARGET_COL, RAW_PATH, 
-    PREPROCESSED_CSV, 
+import pandas as pd
+from predicting_outcomes_in_heart_failure.config import (
+    INTERIM_DATA_DIR,
     NUM_COLS_DEFAULT,
-    INTERIM_DATA_DIR
+    PREPROCESSED_CSV,
+    RAW_PATH,
+    TARGET_COL,
 )
+from sklearn.preprocessing import StandardScaler
 
-   
 
 def preprocessing():
     logger.info("Starting preprocessing pipeline...")
 
     if not RAW_PATH.exists():
         logger.error(f"Missing {RAW_PATH}. Put heart.csv under data/raw/ or adjust RAW_PATH.")
-        raise FileNotFoundError(f"Missing {RAW_PATH}. Put heart.csv under data/raw/ or adjust RAW_PATH.")
+        raise FileNotFoundError(f"Missing {RAW_PATH}.")
 
     df = pd.read_csv(RAW_PATH)
     logger.info(f"Loaded dataset: {RAW_PATH} (rows={len(df)}, cols={df.shape[1]})")
@@ -37,7 +37,7 @@ def preprocessing():
         if zero_mask.any():
             median_chol = df.loc[~zero_mask, "Cholesterol"].median()
             df.loc[zero_mask, "Cholesterol"] = median_chol
-            logger.info(f"Imputed {zero_mask.sum()} Cholesterol==0 values with median={median_chol:.2f}")
+            logger.info(f"Imputed {zero_mask.sum()} Cholesterol==0 with median={median_chol}")
 
     # Encode binary categorical features
     if "Sex" in df.columns:
@@ -61,7 +61,10 @@ def preprocessing():
 
     # Save processed dataset
     df.to_csv(PREPROCESSED_CSV, index=False)
-    logger.success(f"Saved preprocessed dataset: {PREPROCESSED_CSV} (rows={len(df)}, cols={df.shape[1]})")
+    logger.success(
+        "Saved preprocessed dataset: %s (rows=%d, cols=%d)",
+        PREPROCESSED_CSV, len(df), df.shape[1]
+    )
 
     # Log class distribution
     count_0 = (df[TARGET_COL] == 0).sum()
