@@ -1,17 +1,30 @@
 from __future__ import annotations
-from pathlib import Path
-import joblib, json
-import pandas as pd
-import dagshub, mlflow
-import os
 
+import json
+from pathlib import Path
+
+import dagshub
+import joblib
 from loguru import logger
+import mlflow
+import pandas as pd
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
 from predicting_outcomes_in_heart_failure.config import (
-    MODELS_DIR, TARGET_COL, RANDOM_STATE, N_SPLITS, 
-    SCORING,TRAIN_CSV, REPORTS_DIR, EXPERIMENT_NAME, DATASET_NAME,
-    CONFIG_DT, CONFIG_RF, CONFIG_LR, REPO_NAME, REPO_OWNER
+    CONFIG_DT,
+    CONFIG_LR,
+    CONFIG_RF,
+    DATASET_NAME,
+    EXPERIMENT_NAME,
+    MODELS_DIR,
+    N_SPLITS,
+    RANDOM_STATE,
+    REPO_NAME,
+    REPO_OWNER,
+    REPORTS_DIR,
+    SCORING,
+    TARGET_COL,
+    TRAIN_CSV,
 )
 
 REFIT = "f1"
@@ -29,18 +42,21 @@ def load_split(path: Path) -> pd.DataFrame:
 def get_model_and_grid(model_name: str):
     if model_name == "decision_tree":
         from sklearn.tree import DecisionTreeClassifier
+
         estimator = DecisionTreeClassifier(random_state=RANDOM_STATE)
         param_grid = CONFIG_DT
         return estimator, param_grid
 
     elif model_name == "logreg":
         from sklearn.linear_model import LogisticRegression
+
         estimator = LogisticRegression(max_iter=500, random_state=RANDOM_STATE)
         param_grid = CONFIG_LR
         return estimator, param_grid
 
     elif model_name == "random_forest":
         from sklearn.ensemble import RandomForestClassifier
+
         estimator = RandomForestClassifier(random_state=RANDOM_STATE)
         param_grid = CONFIG_RF
         return estimator, param_grid
@@ -63,22 +79,22 @@ def run_grid_search(estimator, param_grid, X_train, y_train, model_name):
     )
     logger.info(f"Starting GridSearchCV for {model_name} …")
     grid.fit(X_train, y_train)
-    
+
     logger.success("GridSearchCV completed.")
     logger.info(f"Best params ({REFIT}): {grid.best_params_}")
     logger.info(f"Best CV {REFIT}: {grid.best_score_:.4f}")
-    
+
     cv_results = Path(REPORTS_DIR / model_name / "cv_results.json")
     df = pd.DataFrame(grid.cv_results_)
     df.to_csv(cv_results, index=False)
-    
+
     mlflow.log_artifact(cv_results)
     return grid.best_estimator_, grid, grid.best_params_
 
 
 def save_artifacts(model, grid, X_train, model_name) -> None:
-    model_path   = MODELS_DIR / f"{model_name}.joblib"
-    
+    model_path = MODELS_DIR / f"{model_name}.joblib"
+
     joblib.dump(model, model_path)
     logger.success(f"Saved model → {model_path}")
 
@@ -98,22 +114,22 @@ def save_artifacts(model, grid, X_train, model_name) -> None:
     cv_params = Path(REPORTS_DIR / model_name / "cv_parameters.json")
     with open(REPORTS_DIR / cv_params, "w") as f:
         json.dump(out, f, indent=4)
-    
+
     mlflow.log_artifact(cv_params)
-    logger.success(f"Saved artifacts")
+    logger.success("Saved artifacts")
 
 
-def train(model_name : str):
+def train(model_name: str):
     if not mlflow.get_experiment_by_name(EXPERIMENT_NAME):
         mlflow.create_experiment(EXPERIMENT_NAME)
     mlflow.set_experiment(EXPERIMENT_NAME)
-    
+
     logger.info(f"=== Training pipeline started (model={model_name}) ===")
 
-    with mlflow.start_run(run_name = model_name):
+    with mlflow.start_run(run_name=model_name):
         train_df = load_split(TRAIN_CSV)
-        
-        rawdata = mlflow.data.from_pandas(train_df, name = DATASET_NAME)
+
+        rawdata = mlflow.data.from_pandas(train_df, name=DATASET_NAME)
         mlflow.log_input(rawdata, context="training")
 
         X_train = train_df.drop(columns=[TARGET_COL])
@@ -123,19 +139,23 @@ def train(model_name : str):
         mlflow.set_tag("estimator_name", estimator.__class__.__name__)
 
         model_dir = REPORTS_DIR / model_name
-        model_dir.mkdir(parents = True, exist_ok=True)
+        model_dir.mkdir(parents=True, exist_ok=True)
 
-        best_model, grid, params = run_grid_search(estimator, param_grid, X_train, y_train, model_name)
+        best_model, grid, params = run_grid_search(
+            estimator, param_grid, X_train, y_train, model_name
+        )
         mlflow.log_params(params)
-        
+
         save_artifacts(best_model, grid, X_train, model_name)
 
+
 def main():
-    dagshub.init(repo_owner = REPO_OWNER, repo_name = REPO_NAME, mlflow=True)
-    
+    dagshub.init(repo_owner=REPO_OWNER, repo_name=REPO_NAME, mlflow=True)
+
     for model in ["logreg", "random_forest", "decision_tree"]:
         train(model)
     logger.success("Training pipeline completed.")
+
 
 if __name__ == "__main__":
     main()

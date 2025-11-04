@@ -1,0 +1,52 @@
+name: Lint (Ruff)
+on:
+  pull_request:
+
+
+permissions:
+  contents: read 
+
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   
+
+      # Install uv and activate cache
+      - uses: astral-sh/setup-uv@v3
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+
+      # Install dev deps
+      - name: Sync dev deps
+        run: uv sync --dev
+
+      - name: Ruff on changed files (format then check)
+        run: |
+          set -euo pipefail
+          BASE_REF="${{ github.base_ref }}"
+          git fetch --no-tags origin "$BASE_REF" --prune
+
+          git diff --name-only "origin/$BASE_REF...HEAD" > /tmp/changed_all.txt
+
+          CHANGED=$(grep -E '\.py$' /tmp/changed_all.txt || true)
+          if [ -z "$CHANGED" ]; then
+            echo "Any Modified file .py: skip Ruff."
+            exit 0
+          fi
+
+          echo "Modified  Python FIles:"
+          echo "$CHANGED" | sed 's/^/ - /'
+
+          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff format --check
+          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff check --force-exclude
+
+
+

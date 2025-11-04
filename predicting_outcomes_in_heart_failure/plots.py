@@ -1,8 +1,10 @@
 from pathlib import Path
+
 from loguru import logger
-import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import  confusion_matrix
+import numpy as np
+from sklearn.metrics import confusion_matrix
+
 from predicting_outcomes_in_heart_failure.config import FIGURES_DIR
 
 
@@ -25,9 +27,12 @@ def save_confusion_matrix(y_true, y_pred, model_name, labels: list[str] | None =
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
             plt.text(
-                j, i, format(cm[i, j], "d"),
-                ha="center", va="center",
-                color="white" if cm[i, j] > thresh else "black"
+                j,
+                i,
+                format(cm[i, j], "d"),
+                ha="center",
+                va="center",
+                color="white" if cm[i, j] > thresh else "black",
             )
 
     plt.tight_layout()
