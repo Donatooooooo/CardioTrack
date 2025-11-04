@@ -54,10 +54,7 @@ extend-exclude = [
 # Enable sets of rules: basic style, static errors, import, upgrade, bugbear, simplify
 select = ["E", "F", "I", "UP", "B", "SIM"]
 ignore = ["E203"]                 # compatibility with slicing and formatter
-per-file-ignores = {
-  "tests/**" = ["S101", "D"],   
-  "notebooks/**" = ["E402", "F401", "D"],  
-}
+per-file-ignores = {"tests/**" = ["S101", "D"], "notebooks/**" = ["E402", "F401", "D"]}
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
