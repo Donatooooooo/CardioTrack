@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   
 
       # Install uv and activate cache
       - uses: astral-sh/setup-uv@v3
@@ -34,6 +36,9 @@ jobs:
           BASE_SHA="${{ github.event.pull_request.base.sha }}"
           HEAD_SHA="${{ github.event.pull_request.head.sha }}"
 
+          echo "BASE_SHA: $BASE_SHA"
+          echo "HEAD_SHA: $HEAD_SHA"
+
           CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -E '\.py$' || true)
 
           if [ -z "$CHANGED" ]; then
@@ -46,3 +51,42 @@ jobs:
 
           echo "$CHANGED" | tr '\n' '\0' | xargs -0 uv run ruff format --check
           echo "$CHANGED" | tr '\n' '\0' | xargs -0 uv run ruff check --force-exclude
+
+
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # <— importante
+
+      - uses: astral-sh/setup-uv@v3
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml','uv.lock') }}
+
+      - name: Sync dev deps
+        run: uv sync --dev
+
+      - name: Ruff on changed files (format then check)
+        run: |
+          set -euo pipefail
+          BASE_REF="${{ github.base_ref }}"
+          git fetch --no-tags origin "$BASE_REF" --prune
+          git diff --name-only "origin/$BASE_REF...HEAD" > /tmp/changed_all.txt
+
+          CHANGED=$(grep -E '\.py$' /tmp/changed_all.txt || true)
+          if [ -z "$CHANGED" ]; then
+            echo "Nessun file .py modificato: skip Ruff."
+            exit 0
+          fi
+
+          echo "File Python modificati:"
+          echo "$CHANGED" | sed 's/^/ - /'
+
+          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff format --check
+          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff check --force-exclude
