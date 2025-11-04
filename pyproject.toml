@@ -67,6 +67,7 @@ docstring-code-format = true          # format code inside docstrings
 
 [dependency-groups]
 dev = [
+    "pynblint>=0.1.6",
     "ruff>=0.14.2",
 ]
 
