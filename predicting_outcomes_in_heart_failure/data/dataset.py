@@ -18,6 +18,5 @@ def main():
     logger.success("Dataset downloaded successfully to {RAW_DATA_DIR}.")
 
 
-
 if __name__ == "__main__":
     app()

@@ -10,7 +10,7 @@ load_dotenv()
 # -------------------
 EXPERIMENT_NAME = "Heart_Failure_Prediction"
 DATASET_NAME = "fedesoriano/heart-failure-prediction"
-TARGET_COL   = "HeartDisease"
+TARGET_COL = "HeartDisease"
 RANDOM_STATE = 42
 TEST_SIZE = 0.30
 N_SPLITS = 5
@@ -22,14 +22,23 @@ SCORING = {
 }
 
 NUM_COLS_DEFAULT = ["Age", "RestingBP", "Cholesterol", "MaxHR", "Oldpeak"]
-CAT_COLS_DEFAULT = ["Sex", "ChestPainType", "FastingBS", "RestingECG",
-                     "ExerciseAngina", "ST_Slope"]
+CAT_COLS_DEFAULT = [
+    "Sex",
+    "ChestPainType",
+    "FastingBS",
+    "RestingECG",
+    "ExerciseAngina",
+    "ST_Slope",
+]
 
 # ----------------------------
 # Model hyperparameter configurations
 # ----------------------------
-CONFIG_RF = {"n_estimators": [200, 400, 800], "max_depth": [None, 6, 12],
-              "class_weight": [None, "balanced"]}
+CONFIG_RF = {
+    "n_estimators": [200, 400, 800],
+    "max_depth": [None, 6, 12],
+    "class_weight": [None, "balanced"],
+}
 CONFIG_DT = {
     "criterion": ["gini", "entropy", "log_loss"],
     "max_depth": [None, 3, 5, 7, 9, 12],
@@ -62,8 +71,8 @@ EXTERNAL_DATA_DIR = DATA_DIR / "external"
 RAW_PATH = RAW_DATA_DIR / "heart.csv"
 PREPROCESSED_CSV = INTERIM_DATA_DIR / "preprocessed.csv"
 TRAIN_CSV = PROCESSED_DATA_DIR / "train.csv"
-TEST_CSV  = PROCESSED_DATA_DIR / "test.csv"
+TEST_CSV = PROCESSED_DATA_DIR / "test.csv"
 
-MODELS_DIR  = PROJ_ROOT / "models"
+MODELS_DIR = PROJ_ROOT / "models"
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"

@@ -33,7 +33,7 @@ def preprocessing():
 
     # Impute missing/zero Cholesterol
     if "Cholesterol" in df.columns:
-        zero_mask = (df["Cholesterol"] == 0)
+        zero_mask = df["Cholesterol"] == 0
         if zero_mask.any():
             median_chol = df.loc[~zero_mask, "Cholesterol"].median()
             df.loc[zero_mask, "Cholesterol"] = median_chol
@@ -62,8 +62,7 @@ def preprocessing():
     # Save processed dataset
     df.to_csv(PREPROCESSED_CSV, index=False)
     logger.success(
-        "Saved preprocessed dataset: %s (rows=%d, cols=%d)",
-        PREPROCESSED_CSV, len(df), df.shape[1]
+        "Saved preprocessed dataset: %s (rows=%d, cols=%d)", PREPROCESSED_CSV, len(df), df.shape[1]
     )
 
     # Log class distribution

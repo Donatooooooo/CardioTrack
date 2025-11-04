@@ -34,33 +34,33 @@ def compute_metrics(model, X_test, y_test) -> dict:
             logger.warning(f"ROC AUC not computed: {e}")
     return results, y_pred
 
-def evaluate():
-    test_df  = load_split(TEST_CSV)
 
-    X_test  = test_df.drop(columns=[TARGET_COL])
-    y_test  = test_df[TARGET_COL].astype(int)
+def evaluate():
+    test_df = load_split(TEST_CSV)
+
+    X_test = test_df.drop(columns=[TARGET_COL])
+    y_test = test_df[TARGET_COL].astype(int)
 
     for file in os.listdir(MODELS_DIR):
         if file.endswith(".joblib"):
-            
             model_name = file.split(".joblib")[0]
             experiment = mlflow.get_experiment_by_name(EXPERIMENT_NAME)
             runs = mlflow.search_runs(
                 experiment_ids=[experiment.experiment_id],
                 filter_string=f"tags.mlflow.runName = '{model_name}'",
                 order_by=["start_time DESC"],
-                max_results=1
+                max_results=1,
             )
-            
+
             tracked_id = runs.loc[0, "run_id"]
-            with mlflow.start_run(run_id = tracked_id):
-                rawdata = mlflow.data.from_pandas(test_df, name = DATASET_NAME)
+            with mlflow.start_run(run_id=tracked_id):
+                rawdata = mlflow.data.from_pandas(test_df, name=DATASET_NAME)
                 mlflow.log_input(rawdata, context="testing")
-                
+
                 model_path = os.path.join(MODELS_DIR, file)
                 model = joblib.load(model_path)
                 metrics, _ = compute_metrics(model, X_test, y_test)
-                
+
                 mlflow.log_metrics(metrics)
                 logger.info(f"{model_name} - Test set metrics:")
                 for k in ["test_f1", "test_recall", "test_accuracy", "test_roc_auc"]:
@@ -79,10 +79,11 @@ def evaluate():
                         artifact_path="Model_Info",
                         signature=signature,
                         input_example=X_test,
-                        registered_model_name=model_name
+                        registered_model_name=model_name,
                     )
 
+
 if __name__ == "__main__":
-    dagshub.init(repo_owner = REPO_OWNER, repo_name = REPO_NAME, mlflow=True)
+    dagshub.init(repo_owner=REPO_OWNER, repo_name=REPO_NAME, mlflow=True)
     evaluate()
     logger.success("Evaluation completed.")

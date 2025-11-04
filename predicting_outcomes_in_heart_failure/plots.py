@@ -27,9 +27,12 @@ def save_confusion_matrix(y_true, y_pred, model_name, labels: list[str] | None =
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
             plt.text(
-                j, i, format(cm[i, j], "d"),
-                ha="center", va="center",
-                color="white" if cm[i, j] > thresh else "black"
+                j,
+                i,
+                format(cm[i, j], "d"),
+                ha="center",
+                va="center",
+                color="white" if cm[i, j] > thresh else "black",
             )
 
     plt.tight_layout()

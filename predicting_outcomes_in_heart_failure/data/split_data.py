@@ -22,10 +22,8 @@ def split():
     # Load dataset
     df = pd.read_csv(PREPROCESSED_CSV)
     logger.info(
-        "Loaded processed dataset: %s (rows=%d, cols=%d)",
-        PREPROCESSED_CSV, len(df), df.shape[1]
+        "Loaded processed dataset: %s (rows=%d, cols=%d)", PREPROCESSED_CSV, len(df), df.shape[1]
     )
-
 
     # Split features and target
     X = df.drop(columns=[TARGET_COL])
@@ -39,20 +37,15 @@ def split():
 
     # Perform split
     X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=TEST_SIZE,
-        stratify=stratify_y,
-        random_state=RANDOM_STATE,
-        shuffle=True
+        X, y, test_size=TEST_SIZE, stratify=stratify_y, random_state=RANDOM_STATE, shuffle=True
     )
     logger.info(f"Performed train/test split with test_size={TEST_SIZE}")
 
     # Recombine for saving
     train_df = X_train.copy()
     train_df[TARGET_COL] = y_train.values
-    test_df  = X_test.copy()
-    test_df[TARGET_COL]  = y_test.values
+    test_df = X_test.copy()
+    test_df[TARGET_COL] = y_test.values
 
     # Save to disk
     train_df.to_csv(TRAIN_CSV, index=False)
@@ -63,7 +56,7 @@ def split():
 
     # Log class distribution
     train_counts = train_df[TARGET_COL].value_counts().to_dict()
-    test_counts  = test_df[TARGET_COL].value_counts().to_dict()
+    test_counts = test_df[TARGET_COL].value_counts().to_dict()
     logger.info(f"Class distribution — TRAIN: {train_counts} | TEST: {test_counts}")
 
     logger.success("Data splitting completed successfully.")
