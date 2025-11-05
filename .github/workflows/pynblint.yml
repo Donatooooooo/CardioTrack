@@ -1,0 +1,94 @@
+name: Lint Notebooks (Pynblint)
+ 
+on:
+  pull_request:
+    
+    paths:
+      - 'notebooks/**/*.ipynb'
+  push:
+    branches:
+      - main
+      - milestone-*
+    paths:
+      - 'notebooks/**/*.ipynb'
+ 
+permissions:
+  contents: read
+  pull-requests: write  # to comment on PRs
+ 
+jobs:
+  pynblint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+    
+ 
+      - name: Setup uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml','uv.lock') }}
+          restore-keys: uv-${{ runner.os }}-
+ 
+      - name: Install dev deps
+        run: uv sync --dev
+ 
+      - name: Run pynblint on notebooks directory
+        id: pynblint
+        continue-on-error: true
+        run: |
+          set -e
+          echo "Running pynblint on notebooks directory..."
+          pynblint notebooks/ > pynblint_report.txt 2>&1 || true
+          cat pynblint_report.txt
+ 
+      - name: Check for violations
+        run: |
+          if grep -q "violation" pynblint_report.txt; then
+            echo "⚠️ Pynblint found violations in notebooks"
+            echo "violations=true" >> $GITHUB_ENV
+            cat pynblint_report.txt
+            exit 1
+          else
+            echo "✅ No violations found"
+            echo "violations=false" >> $GITHUB_ENV
+          fi
+ 
+      - name: Upload pynblint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pynblint-report
+          path: pynblint_report.txt
+          retention-days: 30
+ 
+      - name: Comment PR with results (optional)
+        if: github.event_name == 'pull_request' && always() && env.violations == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('pynblint_report.txt', 'utf8');
+            const body = `## 📓 Pynblint Report
+            Pynblint found some issues in the notebooks:
+            \`\`\`
+            ${report.slice(0, 5000)}
+            \`\`\`
+            ${report.length > 5000 ? '\n*Report truncated. Download the full artifact for details.*' : ''}
+            Please review and fix these issues to improve notebook quality.
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body  
+            });
+
+      - name: TEMP Force violations (for plumbing test)
+        run: echo "violation: fake for test" >> pynblint_report.txt
