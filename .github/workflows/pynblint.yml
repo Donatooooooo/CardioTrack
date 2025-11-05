@@ -6,9 +6,7 @@ on:
     paths:
       - 'notebooks/**/*.ipynb'
   push:
-    branches:
-      - main
-      - milestone-*
+    
     paths:
       - 'notebooks/**/*.ipynb'
  
