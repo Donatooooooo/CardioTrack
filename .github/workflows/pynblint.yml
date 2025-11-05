@@ -87,6 +87,3 @@ jobs:
               repo: context.repo.repo,
               body: body  
             });
-
-      - name: TEMP Force violations (for plumbing test)
-        run: echo "violation: fake for test" >> pynblint_report.txt
