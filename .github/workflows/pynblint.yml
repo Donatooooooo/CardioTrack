@@ -43,7 +43,7 @@ jobs:
         run: |
           set -e
           echo "Running pynblint on notebooks directory..."
-          uvx --from pynblint pynblint notebooks/ > pynblint_report.txt 2>&1 || true
+          uvx "pynblint==0.1.6" --with "click==8.1.7" --with "typer==0.9.0" pynblint notebooks/ > pynblint_report.txt 2>&1 || true
           cat pynblint_report.txt
  
       - name: Check for violations
