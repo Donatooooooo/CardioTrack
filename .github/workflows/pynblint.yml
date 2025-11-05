@@ -43,7 +43,7 @@ jobs:
         run: |
           set -e
           echo "Running pynblint on notebooks directory..."
-          uv run pynblint notebooks/ > pynblint_report.txt 2>&1 || true
+          uvx --from pynblint pynblint notebooks/ > pynblint_report.txt 2>&1 || true
           cat pynblint_report.txt
  
       - name: Check for violations
