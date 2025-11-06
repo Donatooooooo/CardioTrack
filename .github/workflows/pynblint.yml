@@ -37,13 +37,20 @@ jobs:
         run: |
           set -e
           echo "Running pynblint via uvx (isolated & pinned)..."
-          uvx --from pynblint --with "click<8.2" --with "typer<0.12" \
+          uvx --from pynblint \
+            --with "click<8.2" \
+            --with "typer<0.12" \
+            --with "lxml[html_clean]" \
             pynblint notebooks/ > pynblint_report.txt 2>&1 || true
           cat pynblint_report.txt
 
       - name: Check for violations
         run: |
-          if grep -q "violation" pynblint_report.txt; then
+          if grep -qiE "Traceback|ImportError|ModuleNotFoundError" pynblint_report.txt; then
+            echo "❌ pynblint error."
+            cat pynblint_report.txt
+            exit 1
+          elif grep -q "violation" pynblint_report.txt; then
             echo "⚠️ Pynblint found violations in notebooks"
             echo "violations=true" >> $GITHUB_ENV
             cat pynblint_report.txt
