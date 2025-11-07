@@ -1,0 +1,67 @@
+name: Lint Notebooks (Pynblint)
+
+on:
+  pull_request:
+    paths:
+      - 'notebooks/**/*.ipynb'
+
+
+permissions:
+  contents: read
+
+
+jobs:
+  pynblint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv (for uvx)
+        uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml','uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      - name: Run pynblint on notebooks directory
+        id: pynblint
+        run: |
+          set -e
+          echo "Running pynblint via uvx (isolated & pinned)..."
+          uvx --from pynblint \
+            --with "click<8.2" \
+            --with "typer<0.12" \
+            --with "lxml[html_clean]" \
+            pynblint notebooks/ > pynblint_report.txt 2>&1 || true
+          cat pynblint_report.txt
+
+      - name: Check for violations
+        run: |
+          if grep -qiE "Traceback|ImportError|ModuleNotFoundError" pynblint_report.txt; then
+            echo "❌ pynblint error."
+            cat pynblint_report.txt
+            exit 1
+          elif grep -q "LINTING RESULTS" pynblint_report.txt; then
+            echo "⚠️ Pynblint found violations in notebooks"
+            echo "violations=true" >> $GITHUB_ENV
+            cat pynblint_report.txt
+            exit 1
+          else
+            echo "✅ No violations found"
+            echo "violations=false" >> $GITHUB_ENV
+          fi
+
+      - name: Upload pynblint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pynblint-report
+          path: pynblint_report.txt
+          retention-days: 30
