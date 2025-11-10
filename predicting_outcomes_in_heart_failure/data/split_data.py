@@ -22,19 +22,23 @@ VARIANTS = {
     "nosex": NOSEX_CSV,
 }
 
+
 def _safe_train_test_split(X, y, test_size, random_state):
     """Perform a stratified train/test split with fallback if not possible."""
     stratify_y = y if y.nunique() > 1 else None
     try:
         X_tr, X_te, y_tr, y_te = train_test_split(
-            X, y,
+            X,
+            y,
             test_size=test_size,
             stratify=stratify_y,
             random_state=random_state,
-            shuffle=True
+            shuffle=True,
         )
         if stratify_y is None:
-            logger.warning("Target has only one class — performing non-stratified split.")
+            logger.warning(
+                "Target has only one class — performing non-stratified split."
+            )
         else:
             logger.debug("Stratified split executed successfully.")
         return X_tr, X_te, y_tr, y_te
@@ -43,13 +47,15 @@ def _safe_train_test_split(X, y, test_size, random_state):
             f"Stratified split failed ({e}). Falling back to non-stratified split."
         )
         return train_test_split(
-            X, y,
+            X,
+            y,
             test_size=test_size,
             stratify=None,
             random_state=random_state,
-            shuffle=True
+            shuffle=True,
         )
-        
+
+
 def split_one(csv_path: Path, variant: str):
     """Split a specific variant (all/female/male/nosex) into train/test sets."""
     if not csv_path.exists():
@@ -60,7 +66,9 @@ def split_one(csv_path: Path, variant: str):
     logger.info(f"[{variant}] Loaded {csv_path} (rows={len(df)}, cols={df.shape[1]})")
 
     if TARGET_COL not in df.columns:
-        raise ValueError(f"[{variant}] Target column '{TARGET_COL}' not found in {csv_path}")
+        raise ValueError(
+            f"[{variant}] Target column '{TARGET_COL}' not found in {csv_path}"
+        )
 
     X = df.drop(columns=[TARGET_COL])
     y = df[TARGET_COL].astype(int)
@@ -71,13 +79,13 @@ def split_one(csv_path: Path, variant: str):
 
     train_df = X_train.copy()
     train_df[TARGET_COL] = y_train.values
-    test_df  = X_test.copy()
-    test_df[TARGET_COL]  = y_test.values
+    test_df = X_test.copy()
+    test_df[TARGET_COL] = y_test.values
 
     out_dir = PROCESSED_DATA_DIR / variant
     out_dir.mkdir(parents=True, exist_ok=True)
     train_p = out_dir / "train.csv"
-    test_p  = out_dir / "test.csv"
+    test_p = out_dir / "test.csv"
 
     train_df.to_csv(train_p, index=False)
     test_df.to_csv(test_p, index=False)
@@ -86,8 +94,11 @@ def split_one(csv_path: Path, variant: str):
     logger.success(f"[{variant}] Saved TEST  -> {test_p} (rows={len(test_df)})")
 
     train_counts = train_df[TARGET_COL].value_counts().to_dict()
-    test_counts  = test_df[TARGET_COL].value_counts().to_dict()
-    logger.info(f"[{variant}] Class distribution — TRAIN: {train_counts} | TEST: {test_counts}")
+    test_counts = test_df[TARGET_COL].value_counts().to_dict()
+    logger.info(
+        f"[{variant}] Class distribution — TRAIN: {train_counts} | TEST: {test_counts}"
+    )
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -107,6 +118,7 @@ def main():
     PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
     split_one(csv_path, variant)
     logger.success(f"Splitting completed for variant='{variant}'")
+
 
 if __name__ == "__main__":
     main()

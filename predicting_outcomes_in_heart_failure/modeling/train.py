@@ -46,18 +46,21 @@ def get_model_and_grid(model_name: str):
     """Return estimator and parameter grid for the selected model."""
     if model_name == "decision_tree":
         from sklearn.tree import DecisionTreeClassifier
+
         estimator = DecisionTreeClassifier(random_state=RANDOM_STATE)
         param_grid = CONFIG_DT
         return estimator, param_grid
 
     elif model_name == "logreg":
         from sklearn.linear_model import LogisticRegression
+
         estimator = LogisticRegression(max_iter=500, random_state=RANDOM_STATE)
         param_grid = CONFIG_LR
         return estimator, param_grid
 
     elif model_name == "random_forest":
         from sklearn.ensemble import RandomForestClassifier
+
         estimator = RandomForestClassifier(random_state=RANDOM_STATE)
         param_grid = CONFIG_RF
         return estimator, param_grid
@@ -66,8 +69,15 @@ def get_model_and_grid(model_name: str):
         raise ValueError(f"Unknown model_name: {model_name}")
 
 
-def run_grid_search(estimator,param_grid,X_train,y_train,model_name: str,
-                    variant: str,reports_dir: Path,):
+def run_grid_search(
+    estimator,
+    param_grid,
+    X_train,
+    y_train,
+    model_name: str,
+    variant: str,
+    reports_dir: Path,
+):
     """Run GridSearchCV for the specified model and log CV results."""
     cv = StratifiedKFold(
         n_splits=N_SPLITS,
@@ -89,7 +99,9 @@ def run_grid_search(estimator,param_grid,X_train,y_train,model_name: str,
     grid.fit(X_train, y_train)
 
     logger.success(f"[{variant} | {model_name}] GridSearchCV completed.")
-    logger.info(f"[{variant} | {model_name}] Best params ({REFIT}): {grid.best_params_}")
+    logger.info(
+        f"[{variant} | {model_name}] Best params ({REFIT}): {grid.best_params_}"
+    )
     logger.info(f"[{variant} | {model_name}] Best CV {REFIT}: {grid.best_score_:.4f}")
 
     cv_results_path = reports_dir / "cv_results.csv"
@@ -100,8 +112,15 @@ def run_grid_search(estimator,param_grid,X_train,y_train,model_name: str,
     return grid.best_estimator_, grid, grid.best_params_
 
 
-def save_artifacts(model,grid,X_train,model_name: str,variant: str,
-                   model_dir: Path,reports_dir: Path) -> None:
+def save_artifacts(
+    model,
+    grid,
+    X_train,
+    model_name: str,
+    variant: str,
+    model_dir: Path,
+    reports_dir: Path,
+) -> None:
     """Save model, parameters, and metadata to disk and MLflow."""
     model_dir.mkdir(parents=True, exist_ok=True)
     reports_dir.mkdir(parents=True, exist_ok=True)
@@ -182,7 +201,9 @@ def train(model_name: str, variant: str):
             reports_dir=reports_dir,
         )
 
-    logger.success(f"=== Training completed (model={model_name}, variant={variant}) ===")
+    logger.success(
+        f"=== Training completed (model={model_name}, variant={variant}) ==="
+    )
 
 
 def main():
