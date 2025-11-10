@@ -36,16 +36,12 @@ def _safe_train_test_split(X, y, test_size, random_state):
             shuffle=True,
         )
         if stratify_y is None:
-            logger.warning(
-                "Target has only one class — performing non-stratified split."
-            )
+            logger.warning("Target has only one class — performing non-stratified split.")
         else:
             logger.debug("Stratified split executed successfully.")
         return X_tr, X_te, y_tr, y_te
     except ValueError as e:
-        logger.warning(
-            f"Stratified split failed ({e}). Falling back to non-stratified split."
-        )
+        logger.warning(f"Stratified split failed ({e}). Falling back to non-stratified split.")
         return train_test_split(
             X,
             y,
@@ -66,16 +62,12 @@ def split_one(csv_path: Path, variant: str):
     logger.info(f"[{variant}] Loaded {csv_path} (rows={len(df)}, cols={df.shape[1]})")
 
     if TARGET_COL not in df.columns:
-        raise ValueError(
-            f"[{variant}] Target column '{TARGET_COL}' not found in {csv_path}"
-        )
+        raise ValueError(f"[{variant}] Target column '{TARGET_COL}' not found in {csv_path}")
 
     X = df.drop(columns=[TARGET_COL])
     y = df[TARGET_COL].astype(int)
 
-    X_train, X_test, y_train, y_test = _safe_train_test_split(
-        X, y, TEST_SIZE, RANDOM_STATE
-    )
+    X_train, X_test, y_train, y_test = _safe_train_test_split(X, y, TEST_SIZE, RANDOM_STATE)
 
     train_df = X_train.copy()
     train_df[TARGET_COL] = y_train.values
@@ -95,9 +87,7 @@ def split_one(csv_path: Path, variant: str):
 
     train_counts = train_df[TARGET_COL].value_counts().to_dict()
     test_counts = test_df[TARGET_COL].value_counts().to_dict()
-    logger.info(
-        f"[{variant}] Class distribution — TRAIN: {train_counts} | TEST: {test_counts}"
-    )
+    logger.info(f"[{variant}] Class distribution — TRAIN: {train_counts} | TEST: {test_counts}")
 
 
 def main():

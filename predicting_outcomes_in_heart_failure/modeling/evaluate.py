@@ -43,9 +43,7 @@ def compute_metrics(model, X_test, y_test) -> dict:
 
 def evaluate_variant(variant: str, model_name: str | None = None):
     """Evaluate trained models for a given variant, optionally by model."""
-    logger.info(
-        f"=== Evaluation started (variant={variant}, model={model_name or 'ALL'}) ==="
-    )
+    logger.info(f"=== Evaluation started (variant={variant}, model={model_name or 'ALL'}) ===")
 
     test_path = PROCESSED_DATA_DIR / variant / "test.csv"
     test_df = load_split(test_path)
@@ -56,8 +54,7 @@ def evaluate_variant(variant: str, model_name: str | None = None):
     models_dir_variant = MODELS_DIR / variant
     if not models_dir_variant.exists():
         logger.warning(
-            f"[{variant}] "
-            f"Models directory does not exist: {models_dir_variant} — skipping."
+            f"[{variant}] Models directory does not exist: {models_dir_variant} — skipping."
         )
         return
 
@@ -70,9 +67,7 @@ def evaluate_variant(variant: str, model_name: str | None = None):
     if model_name is not None:
         model_files = [f"{model_name}.joblib"]
     else:
-        model_files = [
-            f for f in os.listdir(models_dir_variant) if f.endswith(".joblib")
-        ]
+        model_files = [f for f in os.listdir(models_dir_variant) if f.endswith(".joblib")]
 
     for file in model_files:
         if not file.endswith(".joblib"):
@@ -81,8 +76,7 @@ def evaluate_variant(variant: str, model_name: str | None = None):
         current_model_name = file.split(".joblib")[0]
         run_name = f"{current_model_name}_{variant}"
         logger.info(
-            f"[{variant} | {current_model_name}] "
-            f"Looking for training run '{run_name}' in MLflow."
+            f"[{variant} | {current_model_name}] Looking for training run '{run_name}' in MLflow."
         )
 
         runs = mlflow.search_runs(
@@ -94,17 +88,14 @@ def evaluate_variant(variant: str, model_name: str | None = None):
 
         if runs.empty:
             logger.warning(
-                f"[{variant} | {current_model_name}]"
-                "No matching MLflow run found — skipping."
+                f"[{variant} | {current_model_name}]No matching MLflow run found — skipping."
             )
             continue
 
         tracked_id = runs.loc[0, "run_id"]
 
         with mlflow.start_run(run_id=tracked_id):
-            rawdata = mlflow.data.from_pandas(
-                test_df, name=f"{DATASET_NAME}_{variant}_test"
-            )
+            rawdata = mlflow.data.from_pandas(test_df, name=f"{DATASET_NAME}_{variant}_test")
             mlflow.log_input(rawdata, context="testing")
 
             model_path = models_dir_variant / file
@@ -139,8 +130,7 @@ def evaluate_variant(variant: str, model_name: str | None = None):
                 )
 
     logger.success(
-        f"=== Evaluation completed (variant={variant}, "
-        f"model={model_name or 'ALL'}) ==="
+        f"=== Evaluation completed (variant={variant}, model={model_name or 'ALL'}) ==="
     )
 
 

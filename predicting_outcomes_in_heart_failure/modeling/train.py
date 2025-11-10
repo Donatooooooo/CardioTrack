@@ -99,9 +99,7 @@ def run_grid_search(
     grid.fit(X_train, y_train)
 
     logger.success(f"[{variant} | {model_name}] GridSearchCV completed.")
-    logger.info(
-        f"[{variant} | {model_name}] Best params ({REFIT}): {grid.best_params_}"
-    )
+    logger.info(f"[{variant} | {model_name}] Best params ({REFIT}): {grid.best_params_}")
     logger.info(f"[{variant} | {model_name}] Best CV {REFIT}: {grid.best_score_:.4f}")
 
     cv_results_path = reports_dir / "cv_results.csv"
@@ -201,9 +199,7 @@ def train(model_name: str, variant: str):
             reports_dir=reports_dir,
         )
 
-    logger.success(
-        f"=== Training completed (model={model_name}, variant={variant}) ==="
-    )
+    logger.success(f"=== Training completed (model={model_name}, variant={variant}) ===")
 
 
 def main():
