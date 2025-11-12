@@ -26,11 +26,12 @@ from predicting_outcomes_in_heart_failure.config import (
     REPORTS_DIR,
     SCORING,
     TARGET_COL,
+    VALID_MODELS,
+    VALID_VARIANTS,
 )
 
 REFIT = "f1"
-VALID_MODELS = ["logreg", "random_forest", "decision_tree"]
-VALID_VARIANTS = ["all", "female", "male", "nosex"]
+
 
 
 def load_split(path: Path) -> pd.DataFrame:

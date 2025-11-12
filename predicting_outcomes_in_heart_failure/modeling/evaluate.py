@@ -16,12 +16,10 @@ from predicting_outcomes_in_heart_failure.config import (
     REPO_NAME,
     REPO_OWNER,
     TARGET_COL,
-)
-from predicting_outcomes_in_heart_failure.modeling.train import (
     VALID_MODELS,
     VALID_VARIANTS,
-    load_split,
 )
+from predicting_outcomes_in_heart_failure.modeling.train import load_split
 
 
 def compute_metrics(model, X_test, y_test) -> dict:

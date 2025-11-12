@@ -8,6 +8,8 @@ load_dotenv()
 # -------------------
 # Experiment settings
 # -------------------
+VALID_VARIANTS = ["all", "female", "male", "nosex"]
+VALID_MODELS = ["logreg", "random_forest", "decision_tree"]
 EXPERIMENT_NAME = "Heart_Failure_Prediction"
 DATASET_NAME = "fedesoriano/heart-failure-prediction"
 TARGET_COL = "HeartDisease"
