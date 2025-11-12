@@ -58,9 +58,10 @@ def evaluate_variant(variant: str, model_name: str | None = None):
         )
         return
 
-    experiment = mlflow.get_experiment_by_name(EXPERIMENT_NAME)
+    experiment_name = f"{EXPERIMENT_NAME}_{variant}"
+    experiment = mlflow.get_experiment_by_name(experiment_name)
     if experiment is None:
-        logger.error(f"Experiment '{EXPERIMENT_NAME}' not found.")
+        logger.error(f"Experiment '{experiment_name}' not found.")
         return
 
     model_files = []
