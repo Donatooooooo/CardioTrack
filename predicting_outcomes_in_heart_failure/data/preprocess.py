@@ -1,3 +1,4 @@
+import joblib
 from loguru import logger
 import pandas as pd
 from predicting_outcomes_in_heart_failure.config import (
@@ -6,11 +7,20 @@ from predicting_outcomes_in_heart_failure.config import (
     MALE_CSV,
     NOSEX_CSV,
     NUM_COLS_DEFAULT,
+    PREPROCESS_ARTIFACTS_DIR,
     PREPROCESSED_CSV,
     RAW_PATH,
+    SCALER_PATH,
     TARGET_COL,
 )
 from sklearn.preprocessing import StandardScaler
+
+
+def save_scaler_artifact(scaler: StandardScaler):
+    """Save only the fitted scaler used during preprocessing for inference."""
+    PREPROCESS_ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    joblib.dump(scaler, SCALER_PATH)
+    logger.success(f"Saved StandardScaler to {SCALER_PATH}")
 
 
 def generate_gender_splits(df: pd.DataFrame):
@@ -90,6 +100,8 @@ def preprocessing():
     count_0 = (df[TARGET_COL] == 0).sum()
     count_1 = (df[TARGET_COL] == 1).sum()
     logger.info(f"Target balance — 0: {count_0} | 1: {count_1}")
+
+    save_scaler_artifact(scaler)
 
     logger.success("Preprocessing completed successfully.")
     return df
