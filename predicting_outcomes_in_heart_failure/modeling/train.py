@@ -151,9 +151,10 @@ def save_artifacts(
 
 def train(model_name: str, variant: str):
     """Train a model for a specific dataset variant and log results to MLflow."""
-    if not mlflow.get_experiment_by_name(EXPERIMENT_NAME):
-        mlflow.create_experiment(EXPERIMENT_NAME)
-    mlflow.set_experiment(EXPERIMENT_NAME)
+    experiment_name = f"{EXPERIMENT_NAME}_{variant}"
+    if not mlflow.get_experiment_by_name(experiment_name):
+        mlflow.create_experiment(experiment_name)
+    mlflow.set_experiment(experiment_name)
 
     train_path = PROCESSED_DATA_DIR / variant / "train.csv"
     run_name = f"{model_name}_{variant}"
