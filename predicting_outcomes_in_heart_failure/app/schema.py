@@ -17,7 +17,7 @@ class HeartSample(BaseModel):
     RestingECG: Literal["Normal", "ST", "LVH"]
     MaxHR: int
     ExerciseAngina: Literal["Y", "N"]
-    Oldpeak: float 
+    Oldpeak: float
     ST_Slope: Literal["Up", "Flat", "Down"]
 
     @field_validator("Oldpeak")
