@@ -32,7 +32,28 @@ CAT_COLS_DEFAULT = [
     "ExerciseAngina",
     "ST_Slope",
 ]
+MULTI_CAT = ["ChestPainType", "RestingECG", "ST_Slope"]
 
+INPUT_COLUMNS = [
+    "Age",
+    "Sex",
+    "RestingBP",
+    "Cholesterol",
+    "FastingBS",
+    "MaxHR",
+    "ExerciseAngina",
+    "Oldpeak",
+    "ChestPainType_ASY",
+    "ChestPainType_ATA",
+    "ChestPainType_NAP",
+    "ChestPainType_TA",
+    "RestingECG_LVH",
+    "RestingECG_Normal",
+    "RestingECG_ST",
+    "ST_Slope_Down",
+    "ST_Slope_Flat",
+    "ST_Slope_Up",
+]
 # ----------------------------
 # Model hyperparameter configurations
 # ----------------------------
@@ -82,3 +103,8 @@ FIGURES_DIR = REPORTS_DIR / "figures"
 NOSEX_CSV = INTERIM_DATA_DIR / "preprocessed_no_sex_column.csv"
 MALE_CSV = INTERIM_DATA_DIR / "preprocessed_male_only.csv"
 FEMALE_CSV = INTERIM_DATA_DIR / "preprocessed_female_only.csv"
+
+PREPROCESS_ARTIFACTS_DIR = INTERIM_DATA_DIR / "preprocess_artifacts"
+SCALER_PATH = PREPROCESS_ARTIFACTS_DIR / "scaler.joblib"
+
+MODEL_PATH = Path("models/all/random_forest.joblib")
