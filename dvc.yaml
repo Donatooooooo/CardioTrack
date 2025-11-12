@@ -16,6 +16,7 @@ stages:
       - data/interim/preprocessed_female_only.csv
       - data/interim/preprocessed_male_only.csv
       - data/interim/preprocessed_no_sex_column.csv
+      - data/interim/preprocess_artifacts/scaler.joblib
 
   split_data:
     foreach: [all, female, male, nosex]

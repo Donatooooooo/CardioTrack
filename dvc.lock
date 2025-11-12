@@ -21,9 +21,13 @@ stages:
       size: 35921
     - path: predicting_outcomes_in_heart_failure/data/preprocess.py
       hash: md5
-      md5: 463b78a52c49e3682ccc927d88e0b1dd
-      size: 3676
+      md5: 29f61d254a69fae67b3962164e2adbe5
+      size: 4224
     outs:
+    - path: data/interim/preprocess_artifacts/scaler.joblib
+      hash: md5
+      md5: 224537cb262510335c5515d6156952d6
+      size: 1023
     - path: data/interim/preprocessed.csv
       hash: md5
       md5: aeb0353e39e219cf0b574ab72b08ac26
