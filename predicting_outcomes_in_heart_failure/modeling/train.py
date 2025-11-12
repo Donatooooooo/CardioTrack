@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import dagshub
+from imblearn.over_sampling import RandomOverSampler
 import joblib
 from loguru import logger
 import mlflow
@@ -40,6 +41,30 @@ def load_split(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
     logger.info(f"Loaded {path} (rows={len(df)}, cols={df.shape[1]})")
     return df
+
+
+def apply_random_oversampling(
+    X: pd.DataFrame,
+    y: pd.Series,
+    model_name: str,
+    variant: str,
+):
+    """Apply RandomOverSampler to balance classes in the training set."""
+    logger.info(f"[{variant} | {model_name}] Applying RandomOverSampler on training data...")
+
+    # Log original class distribution
+    orig_counts = y.value_counts().to_dict()
+    logger.info(f"[{variant} | {model_name}] Original class distribution: {orig_counts}")
+
+    ros = RandomOverSampler(random_state=RANDOM_STATE)
+    X_res, y_res = ros.fit_resample(X, y)
+
+    # Log resampled class distribution
+    res_counts = y_res.value_counts().to_dict()
+    logger.info(f"[{variant} | {model_name}] Resampled class distribution: {res_counts}")
+
+    logger.success(f"[{variant} | {model_name}] RandomOverSampler applied successfully.")
+    return X_res, y_res
 
 
 def get_model_and_grid(model_name: str):
@@ -169,6 +194,13 @@ def train(model_name: str, variant: str):
 
         X_train = train_df.drop(columns=[TARGET_COL])
         y_train = train_df[TARGET_COL].astype(int)
+
+        X_train, y_train = apply_random_oversampling(
+            X_train,
+            y_train,
+            model_name=model_name,
+            variant=variant,
+        )
 
         estimator, param_grid = get_model_and_grid(model_name)
         mlflow.set_tag("estimator_name", estimator.__class__.__name__)
