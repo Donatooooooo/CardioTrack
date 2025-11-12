@@ -33,7 +33,6 @@ from predicting_outcomes_in_heart_failure.config import (
 REFIT = "f1"
 
 
-
 def load_split(path: Path) -> pd.DataFrame:
     if not path.exists():
         logger.error(f"Missing split file: {path}. Run split_data.py first.")
