@@ -1,16 +1,47 @@
+import joblib
 from loguru import logger
 import pandas as pd
 from predicting_outcomes_in_heart_failure.config import (
+    FEMALE_CSV,
     INTERIM_DATA_DIR,
+    MALE_CSV,
+    NOSEX_CSV,
     NUM_COLS_DEFAULT,
+    PREPROCESS_ARTIFACTS_DIR,
     PREPROCESSED_CSV,
     RAW_PATH,
+    SCALER_PATH,
     TARGET_COL,
 )
 from sklearn.preprocessing import StandardScaler
 
 
+def save_scaler_artifact(scaler: StandardScaler):
+    """Save only the fitted scaler used during preprocessing for inference."""
+    PREPROCESS_ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    joblib.dump(scaler, SCALER_PATH)
+    logger.success(f"Saved StandardScaler to {SCALER_PATH}")
+
+
+def generate_gender_splits(df: pd.DataFrame):
+    """Create and save gender-based CSV splits (female, male, nosex)."""
+    if "Sex" in df.columns:
+        df_female = df[df["Sex"] == 0].copy()
+        df_female.to_csv(FEMALE_CSV, index=False)
+        logger.success(f"Saved female-only dataset: {FEMALE_CSV} (rows={len(df_female)})")
+
+    if "Sex" in df.columns:
+        df_male = df[df["Sex"] == 1].copy()
+        df_male.to_csv(MALE_CSV, index=False)
+        logger.success(f"Saved male-only dataset: {MALE_CSV} (rows={len(df_male)})")
+
+    df_nosex = df.drop(columns=["Sex"], errors="ignore").copy()
+    df_nosex.to_csv(NOSEX_CSV, index=False)
+    logger.success(f"Saved dataset without 'Sex': {NOSEX_CSV} (rows={len(df_nosex)})")
+
+
 def preprocessing():
+    """Run the full preprocessing pipeline on the raw heart dataset."""
     logger.info("Starting preprocessing pipeline...")
 
     if not RAW_PATH.exists():
@@ -70,9 +101,13 @@ def preprocessing():
     count_1 = (df[TARGET_COL] == 1).sum()
     logger.info(f"Target balance — 0: {count_0} | 1: {count_1}")
 
+    save_scaler_artifact(scaler)
+
     logger.success("Preprocessing completed successfully.")
+    return df
 
 
 if __name__ == "__main__":
     INTERIM_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    preprocessing()
+    df_processed = preprocessing()
+    generate_gender_splits(df_processed)
