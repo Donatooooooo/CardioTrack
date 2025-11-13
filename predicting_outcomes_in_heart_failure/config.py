@@ -80,6 +80,13 @@ REPO_OWNER = "se4ai2526-uniba"
 REPO_NAME = "CardioTrack"
 
 # ----------------------------
+# Great Expectations
+# ----------------------------
+SOURCE_NAME = "heart_data_source"
+ASSET_NAME = "heart_failure"
+SUITE_NAME = "heart_failure_data_quality"
+
+# ----------------------------
 # Paths
 # ----------------------------
 PROJ_ROOT = Path(__file__).resolve().parents[1]
