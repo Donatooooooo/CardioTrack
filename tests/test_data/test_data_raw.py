@@ -96,9 +96,7 @@ def run_test():
 if __name__ == "__main__":
     df = pd.read_csv(RAW_PATH)
     context, suite, batch_definition = set_gx(
-        SOURCE_NAME + "_raw",
-        ASSET_NAME + "_raw",
-        SUITE_NAME + "_raw"
+        SOURCE_NAME + "_raw", ASSET_NAME + "_raw", SUITE_NAME + "_raw"
     )
 
     features_columns = [

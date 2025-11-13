@@ -1,5 +1,6 @@
 import great_expectations as gx
 
+
 def set_gx(source_name, asset_name, suite_name):
     context = gx.get_context()
 
