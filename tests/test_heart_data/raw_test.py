@@ -1,5 +1,4 @@
 import great_expectations as gx
-from gx_util import set_gx
 import pandas as pd
 from predicting_outcomes_in_heart_failure.config import (
     ASSET_NAME,
@@ -7,6 +6,7 @@ from predicting_outcomes_in_heart_failure.config import (
     SOURCE_NAME,
     SUITE_NAME,
 )
+from util import set_gx, show_results
 
 
 def run_test():
@@ -90,7 +90,7 @@ def run_test():
     )
 
     checkpoint_result = checkpoint.run(batch_parameters={"dataframe": df})
-    print(checkpoint_result.describe())
+    show_results(checkpoint_result)
 
 
 if __name__ == "__main__":
