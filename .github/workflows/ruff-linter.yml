@@ -34,7 +34,7 @@ jobs:
           BASE_REF="${{ github.base_ref }}"
           git fetch --no-tags origin "$BASE_REF" --prune
 
-          git diff --name-only "origin/$BASE_REF...HEAD" > /tmp/changed_all.txt
+          git diff --name-only --diff-filter=ACMRT "origin/$BASE_REF...HEAD" > /tmp/changed_all.txt
 
           CHANGED=$(grep -E '\.py$' /tmp/changed_all.txt || true)
           if [ -z "$CHANGED" ]; then
