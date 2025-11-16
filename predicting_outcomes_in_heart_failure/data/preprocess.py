@@ -51,6 +51,9 @@ def preprocessing():
     df = pd.read_csv(RAW_PATH)
     logger.info(f"Loaded dataset: {RAW_PATH} (rows={len(df)}, cols={df.shape[1]})")
 
+    if len(df) < 2:
+        raise ValueError("Preprocessing requires at least 2 rows, got only 1.")
+
     # Ensure target is integer
     df[TARGET_COL] = df[TARGET_COL].astype(int)
 
