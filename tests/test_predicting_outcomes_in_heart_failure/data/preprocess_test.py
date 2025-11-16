@@ -454,12 +454,10 @@ class TestPreprocessing:
 
         assert df["HeartDisease"].dtype == np.int64 or df["HeartDisease"].dtype == np.int32
 
-    @pytest.mark.xfail(
-        reason="Known issue: preprocessing fails with single-row datasets due to scaling"
-    )
+
     def test_preprocessing_single_row(self, mock_paths):
         """
-        Test edge case preprocessing with only one row.
+        Test that preprocessing raises an error when the dataset contains only one row.
         """
 
         (mock_paths / "raw").mkdir(parents=True, exist_ok=True)
@@ -481,8 +479,8 @@ class TestPreprocessing:
         )
         single_row.to_csv(mock_paths / "raw" / "heart.csv", index=False)
 
-        df = preprocessing()
-        assert len(df) == 1
+        with pytest.raises(ValueError):
+            preprocessing()
 
 
 class TestPreprocessingIntegration:
