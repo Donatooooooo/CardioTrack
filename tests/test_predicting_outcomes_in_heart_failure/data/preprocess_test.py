@@ -454,7 +454,6 @@ class TestPreprocessing:
 
         assert df["HeartDisease"].dtype == np.int64 or df["HeartDisease"].dtype == np.int32
 
-
     def test_preprocessing_single_row(self, mock_paths):
         """
         Test that preprocessing raises an error when the dataset contains only one row.

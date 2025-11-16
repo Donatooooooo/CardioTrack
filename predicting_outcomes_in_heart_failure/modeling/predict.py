@@ -7,11 +7,16 @@ import pandas as pd
 
 from predicting_outcomes_in_heart_failure.app.schema import HeartSample
 from predicting_outcomes_in_heart_failure.config import (
+    FIGURES_DIR,
     INPUT_COLUMNS,
     MODEL_PATH,
     MULTI_CAT,
     NUM_COLS_DEFAULT,
     SCALER_PATH,
+)
+from predicting_outcomes_in_heart_failure.modeling.explainability import (
+    explain_prediction,
+    save_shap_waterfall_plot,
 )
 
 
@@ -94,6 +99,25 @@ def main():
     y_pred = model.predict(X)[0]
     y_pred = int(y_pred) if np.issubdtype(type(y_pred), np.integer) else y_pred
     result = {"prediction": y_pred}
+
+    # Explainability
+    model = joblib.load(MODEL_PATH)
+    model_type = MODEL_PATH.stem
+    try:
+        logger.info("Computing explanation for the prediction...")
+        explanations = explain_prediction(model, X, model_type=model_type, top_k=5)
+        result["explanations"] = explanations
+        logger.success("Explanation computed successfully.")
+    except Exception as e:
+        logger.error(f"Failed to compute explanation: {e}")
+
+    try:
+        shap_path = FIGURES_DIR / f"shap_waterfall_{model_type}.png"
+        saved = save_shap_waterfall_plot(model, X, model_type=model_type, output_path=shap_path)
+        if saved is not None:
+            result["explanation_plot"] = str(saved)
+    except Exception as e:
+        logger.error(f"Failed to generate SHAP waterfall plot: {e}")
 
     logger.info("Inference completed.")
     logger.success(f"Prediction result: {result}")
