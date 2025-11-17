@@ -14,7 +14,7 @@ import pytest
 )
 def test_compute_metrics_all_models(request, model_fixture, definition_X_test_and_y_test):
     """
-    Check computer_metrics works well 
+    Check computer_metrics works well
     for all model saved in variant "all"
     """
 
