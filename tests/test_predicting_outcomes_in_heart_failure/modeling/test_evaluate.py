@@ -14,8 +14,8 @@ import pytest
 )
 def test_compute_metrics_all_models(request, model_fixture, definition_X_test_and_y_test):
     """
-    Verifica che compute_metrics funzioni correttamente per tutti i modelli
-    salvati nella variant 'all'.
+    Check computer_metrics works well 
+    for all model saved in variant "all"
     """
 
     X_test, y_test = definition_X_test_and_y_test
