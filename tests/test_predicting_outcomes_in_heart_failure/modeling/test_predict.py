@@ -1,5 +1,4 @@
 import pandas as pd
-
 from predicting_outcomes_in_heart_failure.config import INPUT_COLUMNS
 from predicting_outcomes_in_heart_failure.modeling.predict import preprocessing
 
@@ -16,7 +15,6 @@ def test_preprocessing_produces_expected_columns(sample_raw_df_single):
     * with no NaN values
     """
 
-
     processed = preprocessing(sample_raw_df_single)
 
     assert isinstance(processed, pd.DataFrame)
@@ -26,7 +24,6 @@ def test_preprocessing_produces_expected_columns(sample_raw_df_single):
     assert not processed.isna().any().any()
 
 
-
 def test_preprocessing_maps_sex_correctly(sample_raw_df_two_rows):
     """
     Given a DataFrame with Sex = [M, F],
@@ -34,9 +31,7 @@ def test_preprocessing_maps_sex_correctly(sample_raw_df_two_rows):
       - Sex is mapped to [1, 0]
     """
 
-
     processed = preprocessing(sample_raw_df_two_rows)
-
 
     sex_values = processed["Sex"].tolist()
     assert sex_values == [1, 0]
@@ -53,6 +48,7 @@ def test_preprocessing_encodes_exerciseAngina_binary(sample_raw_df_two_rows):
 
     ea_values = processed["ExerciseAngina"].tolist()
     assert ea_values == [1, 0]
+
 
 def test_preprocessing_one_hot_chestPainType(sample_raw_df_two_rows):
     """
@@ -76,6 +72,7 @@ def test_preprocessing_one_hot_chestPainType(sample_raw_df_two_rows):
     assert processed.loc[1, "ChestPainType_NAP"] == 1
     assert processed.loc[1, "ChestPainType_TA"] == 0
 
+
 def test_preprocessing_one_hot_restingecg(sample_raw_df_two_rows):
     """
     Given RestingECG = [Normal, ST],
@@ -94,6 +91,7 @@ def test_preprocessing_one_hot_restingecg(sample_raw_df_two_rows):
     # Row 1: ST
     assert processed.loc[1, "RestingECG_Normal"] == 0
     assert processed.loc[1, "RestingECG_ST"] == 1
+
 
 def test_preprocessing_one_hot_st_slope(sample_raw_df_two_rows):
     """
