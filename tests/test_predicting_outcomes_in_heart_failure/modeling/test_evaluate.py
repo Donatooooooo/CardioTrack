@@ -1,11 +1,11 @@
-import pytest
+import types
+from types import SimpleNamespace
+
 import numpy as np
 import pandas as pd
-from types import SimpleNamespace
-import types
-
-from predicting_outcomes_in_heart_failure.modeling import evaluate
 from predicting_outcomes_in_heart_failure.config import TARGET_COL
+from predicting_outcomes_in_heart_failure.modeling import evaluate
+import pytest
 
 
 @pytest.mark.parametrize(
@@ -22,7 +22,6 @@ def test_compute_metrics_all_models(request, model_fixture, definition_X_test_an
 
     model = request.getfixturevalue(model_fixture)
 
-
     results, y_pred = evaluate.compute_metrics(model, X_test, y_test)
 
     # ---- ASSERTIONS ----
@@ -36,7 +35,8 @@ def test_compute_metrics_all_models(request, model_fixture, definition_X_test_an
         assert "test_roc_auc" in results
         assert 0.0 <= results["test_roc_auc"] <= 1.0
     else:
-        assert "test_roc_auc" not in results    
+        assert "test_roc_auc" not in results
+
 
 class DummyModelNoProba:
     def __init__(self, y_pred):
@@ -59,9 +59,7 @@ def test_compute_metrics_without_predict_proba():
     assert "test_f1" in results
     assert "test_recall" in results
     assert "test_accuracy" in results
-    assert "test_roc_auc" not in results     
-
-
+    assert "test_roc_auc" not in results
 
 
 def test_evaluate_variant_skips_when_models_dir_missing(
@@ -85,7 +83,6 @@ def test_evaluate_variant_skips_when_models_dir_missing(
 
     monkeypatch.setattr(evaluate, "load_split", fake_load_split)
 
-
     models_root = tmp_path / "models"
     models_root.mkdir()  # root exists, but models_root / "all" does not
     monkeypatch.setattr(evaluate, "MODELS_DIR", models_root)
@@ -103,11 +100,7 @@ def test_evaluate_variant_skips_when_models_dir_missing(
 
     evaluate.evaluate_variant(variant=variant, model_name=None)
 
-
     assert DummyMlflow.called_get_experiment == 0
-
-
-
 
 
 def test_evaluate_variant_skips_model_when_no_mlflow_run(
@@ -162,10 +155,7 @@ def test_evaluate_variant_skips_model_when_no_mlflow_run(
     # ASSERT
     assert mlflow_no_runs.called_search_runs == 1
     assert compute_metrics_calls["count"] == 0
-    assert any(
-        "No matching MLflow run found — skipping." in msg
-        for msg in dummy_logger.warnings
-    )
+    assert any("No matching MLflow run found — skipping." in msg for msg in dummy_logger.warnings)
 
 
 def test_evaluate_variant_returns_when_experiment_missing(
@@ -244,9 +234,7 @@ def test_evaluate_variant_happy_path_without_promotion(
         assert path == model_path
         return DummyModel()
 
-    monkeypatch.setattr(
-        evaluate, "joblib", types.SimpleNamespace(load=fake_joblib_load)
-    )
+    monkeypatch.setattr(evaluate, "joblib", types.SimpleNamespace(load=fake_joblib_load))
 
     # compute_metrics called once, returning low metrics
     compute_metrics_calls = {"count": 0}
@@ -312,7 +300,6 @@ def test_evaluate_variant_happy_path_without_promotion(
 
     monkeypatch.setattr(evaluate, "mlflow", DummyMlflow)
 
-    
     evaluate.evaluate_variant(variant=variant, model_name=model_name)
 
     # ASSERTIONS
