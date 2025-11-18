@@ -265,7 +265,7 @@ class TestPreprocessing:
 
         data = raw_heart_data.copy()
         data["Sex"] = sex_input
-        data["RestingBP"] = 120  # BHOOO
+        data["RestingBP"] = 120
 
         (mock_paths / "raw").mkdir(parents=True, exist_ok=True)
         data.to_csv(mock_paths / "raw" / "heart.csv", index=False)
@@ -289,7 +289,7 @@ class TestPreprocessing:
 
         data = raw_heart_data.copy()
         data["ExerciseAngina"] = exercise_input
-        data["RestingBP"] = 120  # BHOOO
+        data["RestingBP"] = 120 
 
         (mock_paths / "raw").mkdir(parents=True, exist_ok=True)
         data.to_csv(mock_paths / "raw" / "heart.csv", index=False)
@@ -408,7 +408,7 @@ class TestPreprocessing:
         )
         empty_df.to_csv(mock_paths / "raw" / "heart.csv", index=False)
 
-        with pytest.raises(ValueError):  # , KeyError)):
+        with pytest.raises(ValueError):
             preprocessing()
 
     def test_preprocessing_returns_dataframe(self, mock_paths, raw_heart_data):
