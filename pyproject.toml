@@ -18,6 +18,7 @@ classifiers = [
 dependencies = [
     "asttokens>=3.0.0",
     "dagshub>=0.6.3",
+    "great-expectations>=1.9.0",
     "imbalanced-learn>=0.14.0",
     "ipykernel>=7.1.0",
     "kagglehub>=0.3.13",
@@ -33,6 +34,7 @@ dependencies = [
     "ruff",
     "scikit-learn>=1.7.2",
     "seaborn>=0.13.2",
+    "shap>=0.50.0",
     "tqdm",
     "typer",
 ]
@@ -40,14 +42,37 @@ requires-python = "~=3.11.0"
 
 
 [tool.ruff]
+target-version = "py311"
 line-length = 99
-src = ["predicting_outcomes_in_heart_failure"]
-include = ["pyproject.toml", "predicting_outcomes_in_heart_failure/**/*.py"]
+src = [
+    "predicting_outcomes_in_heart_failure",
+    "tests",
+]
+include = ["pyproject.toml", "predicting_outcomes_in_heart_failure/**/*.py", "tests/**/*.py",]
+extend-exclude = [
+  ".git/", ".venv/", ".ruff_cache/", ".mypy_cache/",
+  "data/", "artifacts/", "mlruns/", "notebooks/.ipynb_checkpoints/",
+]
+
 
 [tool.ruff.lint]
-extend-select = ["I"]  # Add import sorting
+# Enable sets of rules: basic style, static errors, import, upgrade, bugbear, simplify
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E203"]                 # compatibility with slicing and formatter
+per-file-ignores = {"tests/**" = ["S101", "D"], "notebooks/**" = ["E402", "F401", "D"]}
 
 [tool.ruff.lint.isort]
-known-first-party = ["predicting_outcomes_in_heart_failure"]
 force-sort-within-sections = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true          # format code inside docstrings
+
+
+[dependency-groups]
+dev = [
+    "pynblint>=0.1.6",
+    "ruff>=0.14.2",
+]
 

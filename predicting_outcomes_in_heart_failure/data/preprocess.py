@@ -1,24 +1,58 @@
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
+import joblib
 from loguru import logger
-from predicting_outcomes_in_heart_failure.config import(
-    TARGET_COL, RAW_PATH, 
-    PREPROCESSED_CSV, 
+import pandas as pd
+from predicting_outcomes_in_heart_failure.config import (
+    FEMALE_CSV,
+    INTERIM_DATA_DIR,
+    MALE_CSV,
+    NOSEX_CSV,
     NUM_COLS_DEFAULT,
-    INTERIM_DATA_DIR
+    PREPROCESS_ARTIFACTS_DIR,
+    PREPROCESSED_CSV,
+    RAW_PATH,
+    SCALER_PATH,
+    TARGET_COL,
 )
+from sklearn.preprocessing import StandardScaler
 
-   
+
+def save_scaler_artifact(scaler: StandardScaler):
+    """Save only the fitted scaler used during preprocessing for inference."""
+    PREPROCESS_ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    joblib.dump(scaler, SCALER_PATH)
+    logger.success(f"Saved StandardScaler to {SCALER_PATH}")
+
+
+def generate_gender_splits(df: pd.DataFrame):
+    """Create and save gender-based CSV splits (female, male, nosex)."""
+    if "Sex" in df.columns:
+        df_female = df[df["Sex"] == 0].copy()
+        df_female.to_csv(FEMALE_CSV, index=False)
+        logger.success(f"Saved female-only dataset: {FEMALE_CSV} (rows={len(df_female)})")
+
+    if "Sex" in df.columns:
+        df_male = df[df["Sex"] == 1].copy()
+        df_male.to_csv(MALE_CSV, index=False)
+        logger.success(f"Saved male-only dataset: {MALE_CSV} (rows={len(df_male)})")
+
+    df_nosex = df.drop(columns=["Sex"], errors="ignore").copy()
+    df_nosex.to_csv(NOSEX_CSV, index=False)
+    logger.success(f"Saved dataset without 'Sex': {NOSEX_CSV} (rows={len(df_nosex)})")
+
 
 def preprocessing():
+    """Run the full preprocessing pipeline on the raw heart dataset."""
     logger.info("Starting preprocessing pipeline...")
 
     if not RAW_PATH.exists():
         logger.error(f"Missing {RAW_PATH}. Put heart.csv under data/raw/ or adjust RAW_PATH.")
-        raise FileNotFoundError(f"Missing {RAW_PATH}. Put heart.csv under data/raw/ or adjust RAW_PATH.")
+        raise FileNotFoundError(f"Missing {RAW_PATH}.")
 
     df = pd.read_csv(RAW_PATH)
     logger.info(f"Loaded dataset: {RAW_PATH} (rows={len(df)}, cols={df.shape[1]})")
+
+    if len(df) < 2:
+        raise ValueError("Preprocessing requires at least 2 rows, got only 1.")
 
     # Ensure target is integer
     df[TARGET_COL] = df[TARGET_COL].astype(int)
@@ -33,11 +67,11 @@ def preprocessing():
 
     # Impute missing/zero Cholesterol
     if "Cholesterol" in df.columns:
-        zero_mask = (df["Cholesterol"] == 0)
+        zero_mask = df["Cholesterol"] == 0
         if zero_mask.any():
             median_chol = df.loc[~zero_mask, "Cholesterol"].median()
             df.loc[zero_mask, "Cholesterol"] = median_chol
-            logger.info(f"Imputed {zero_mask.sum()} Cholesterol==0 values with median={median_chol:.2f}")
+            logger.info(f"Imputed {zero_mask.sum()} Cholesterol==0 with median={median_chol}")
 
     # Encode binary categorical features
     if "Sex" in df.columns:
@@ -61,16 +95,22 @@ def preprocessing():
 
     # Save processed dataset
     df.to_csv(PREPROCESSED_CSV, index=False)
-    logger.success(f"Saved preprocessed dataset: {PREPROCESSED_CSV} (rows={len(df)}, cols={df.shape[1]})")
+    logger.success(
+        "Saved preprocessed dataset: %s (rows=%d, cols=%d)", PREPROCESSED_CSV, len(df), df.shape[1]
+    )
 
     # Log class distribution
     count_0 = (df[TARGET_COL] == 0).sum()
     count_1 = (df[TARGET_COL] == 1).sum()
     logger.info(f"Target balance — 0: {count_0} | 1: {count_1}")
 
+    save_scaler_artifact(scaler)
+
     logger.success("Preprocessing completed successfully.")
+    return df
 
 
 if __name__ == "__main__":
     INTERIM_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    preprocessing()
+    df_processed = preprocessing()
+    generate_gender_splits(df_processed)

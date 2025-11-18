@@ -2,38 +2,83 @@ stages:
   download_data:
     cmd: uv run predicting_outcomes_in_heart_failure/data/dataset.py
     deps:
-    - predicting_outcomes_in_heart_failure/data/dataset.py
+      - predicting_outcomes_in_heart_failure/data/dataset.py
     outs:
-    - data/raw/heart.csv
+      - data/raw/heart.csv
+
   preprocessing:
     cmd: uv run predicting_outcomes_in_heart_failure/data/preprocess.py
     deps:
-    - predicting_outcomes_in_heart_failure/data/preprocess.py
-    - data/raw/heart.csv
+      - predicting_outcomes_in_heart_failure/data/preprocess.py
+      - data/raw/heart.csv
     outs:
-    - data/interim/preprocessed.csv
+      - data/interim/preprocessed.csv
+      - data/interim/preprocessed_female_only.csv
+      - data/interim/preprocessed_male_only.csv
+      - data/interim/preprocessed_no_sex_column.csv
+      - data/interim/preprocess_artifacts/scaler.joblib
+
   split_data:
-    cmd: uv run predicting_outcomes_in_heart_failure/data/split_data.py
-    deps:
-    - predicting_outcomes_in_heart_failure/data/split_data.py
-    - data/interim/preprocessed.csv
-    outs:
-    - data/processed
+    foreach: [all, female, male, nosex]
+    do:
+      cmd: >
+        uv run predicting_outcomes_in_heart_failure/data/split_data.py
+        --variant ${item}
+      deps:
+        - predicting_outcomes_in_heart_failure/data/split_data.py
+        - data/interim/preprocessed.csv
+        - data/interim/preprocessed_female_only.csv
+        - data/interim/preprocessed_male_only.csv
+        - data/interim/preprocessed_no_sex_column.csv
+      outs:
+        - data/processed/${item}
+
   training:
-    cmd: uv run predicting_outcomes_in_heart_failure/modeling/train.py
-    deps:
-    - predicting_outcomes_in_heart_failure/modeling/train.py
-    - data/processed/train.csv
-    outs:
-    - models/decision_tree.joblib
-    - models/random_forest.joblib
-    - models/logreg.joblib
-    - reports/decision_tree
-    - reports/random_forest
-    - reports/logreg
+    foreach:
+      - { variant: all,    model: logreg }
+      - { variant: all,    model: random_forest }
+      - { variant: all,    model: decision_tree }
+      - { variant: female, model: logreg }
+      - { variant: female, model: random_forest }
+      - { variant: female, model: decision_tree }
+      - { variant: male,   model: logreg }
+      - { variant: male,   model: random_forest }
+      - { variant: male,   model: decision_tree }
+      - { variant: nosex,  model: logreg }
+      - { variant: nosex,  model: random_forest }
+      - { variant: nosex,  model: decision_tree }
+    do:
+      cmd: >
+        uv run predicting_outcomes_in_heart_failure/modeling/train.py
+        --variant ${item.variant}
+        --model ${item.model}
+      deps:
+        - predicting_outcomes_in_heart_failure/modeling/train.py
+        - data/processed/${item.variant}/train.csv
+      outs:
+        - models/${item.variant}/${item.model}.joblib
+        - reports/${item.variant}/${item.model}
+
   evaluation:
-    cmd: uv run predicting_outcomes_in_heart_failure/modeling/evaluate.py
-    deps: 
-    - predicting_outcomes_in_heart_failure/modeling/evaluate.py
-    - data/processed/test.csv
-    - models
+    foreach:
+      - { variant: all,    model: logreg }
+      - { variant: all,    model: random_forest }
+      - { variant: all,    model: decision_tree }
+      - { variant: female, model: logreg }
+      - { variant: female, model: random_forest }
+      - { variant: female, model: decision_tree }
+      - { variant: male,   model: logreg }
+      - { variant: male,   model: random_forest }
+      - { variant: male,   model: decision_tree }
+      - { variant: nosex,  model: logreg }
+      - { variant: nosex,  model: random_forest }
+      - { variant: nosex,  model: decision_tree }
+    do:
+      cmd: >
+        uv run predicting_outcomes_in_heart_failure/modeling/evaluate.py
+        --variant ${item.variant}
+        --model ${item.model}
+      deps:
+        - predicting_outcomes_in_heart_failure/modeling/evaluate.py
+        - models/${item.variant}/${item.model}.joblib
+        - data/processed/${item.variant}/test.csv

@@ -136,3 +136,52 @@ Each experiment is logged to MLflow.
 
 #### Model Registry and Thresholds
 Models that reach or exceed the predefined **performance thresholds** (as defined in the ML Canvas) are automatically **saved to the model registry**.  
+
+### Milestone 3 – Quality Assurance
+
+In this milestone, we introduced  **Quality Assurance** layer to the system.
+
+#### Static Linters
+Two static linters were added to improve code style and consistency:
+
+- **Ruff** for Python files in the `predicting_outcomes_in_heart_failure` and `tests` folders.
+  It checks formatting, syntax, and common anti-patterns, and is integrated into the GitHub workflow via an *action*.
+- **Pynblint** for Jupyter notebooks, also integrated into the GitHub workflow through a dedicated *action*.
+
+#### Data Quality
+We implemented **data quality checks** on both raw and processed data using **Great Expectations**.
+These validations help to:
+
+- detect anomalies or invalid values at the data source
+- prevent the propagation of data issues into downstream processes
+
+#### Code Quality
+We added automated **unit and integration tests** using **pytest**, covering the main modules and functionalities of the system.
+
+
+#### ML Pipeline Enhancements
+ we applied the following enhancements to the ML pipeline:
+
+- Refactored preprocessing with gender-based dataset variants.
+- Added validation (e.g., error on single-row datasets).
+- Saved StandardScaler as preprocessing artifact.
+- Updated split logic and DVC pipeline.
+- Training now creates variant-specific MLflow experiments.
+- Added RandomOverSampler to address class imbalance.
+- Updated evaluation and inference to align with the new structure.
+
+#### Explainability
+We applied an explainability module:
+
+- Added SHAP explainability module.
+- Added tests for explainability functionality.
+
+
+#### Risk Classification
+We added a **Risk Classification** analysis for the system in accordance with **IMDRF** and **AI Act** regulations.
+The documentation is available in the [`docs/`](./docs) folder.
+
+
+
+
+
