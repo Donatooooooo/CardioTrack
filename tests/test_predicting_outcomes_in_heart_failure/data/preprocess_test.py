@@ -289,7 +289,7 @@ class TestPreprocessing:
 
         data = raw_heart_data.copy()
         data["ExerciseAngina"] = exercise_input
-        data["RestingBP"] = 120 
+        data["RestingBP"] = 120
 
         (mock_paths / "raw").mkdir(parents=True, exist_ok=True)
         data.to_csv(mock_paths / "raw" / "heart.csv", index=False)
