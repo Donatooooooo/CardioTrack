@@ -117,6 +117,6 @@ SCALER_PATH = PREPROCESS_ARTIFACTS_DIR / "scaler.joblib"
 MODEL_PATH = Path("models/all/random_forest.joblib")
 
 CARD_PATHS = {
-    "dataset card": DATA_DIR / "README.md",    
-    "model card" : MODELS_DIR / "README.md",
+    "dataset card": DATA_DIR / "README.md",
+    "model card": MODELS_DIR / "README.md",
 }
