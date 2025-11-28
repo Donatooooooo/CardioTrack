@@ -10,7 +10,8 @@
   - [Data Fields](#data-fields)
 - [Dataset Creation](#dataset-creation)
   - [Source Data](#source-data)
-    - [Who are the source data producers?](#who-are-the-source-data-producers)
+  - [Data Preprocessing](#data-preprocessing)
+  - [Who are the data producers?](#who-are-the-data-producers)
   - [Annotations](#annotations)
   - [Personal and Sensitive Information](#personal-and-sensitive-information)
 - [Considerations for Using the Data](#considerations-for-using-the-data)
@@ -31,10 +32,10 @@
 ### Dataset Summary
 
 This dataset contains anonymized clinical data used to predict the risk of heart failure.  
-It includes **918 patient records**, **10 clinical features**, and **one target variable**.  
+It includes **918 patient records**, **11 clinical features**, and **one target variable**.  
 The original dataset was downloaded from Kaggle and was created by merging five well-known cardiology datasets.
 
-The version used in this project underwent additional preprocessing steps, including normalization, categorical encoding, and removal of the `sex` feature. The resulting dataset is used for experimentation and model development.
+The version used in this project underwent additional preprocessing steps, including standardization, normalization, categorical encoding, and removal of the Sex feature. The resulting dataset is used for experimentation and model development.
 
 
 
@@ -64,9 +65,9 @@ English **(en)**
 
 Each instance represents one patient. Example:
 
-| Age | ChestPainType | RestingBP | Cholesterol | FastingBS | RestingECG | MaxHR | ExerciseAngina | Oldpeak | ST_Slope | HeartDisease |
-|-----|---------------|-----------|-------------|-----------|------------|-------|----------------|---------|----------|--------------|
-| 54  | ASY           | 140       | 239         | 0         | Normal     | 160   | N              | 1.2     | Flat     | 1            |
+| Age |Sex | ChestPainType | RestingBP | Cholesterol | FastingBS | RestingECG | MaxHR | ExerciseAngina | Oldpeak | ST_Slope | HeartDisease |
+|-----|----|---------------|-----------|-------------|-----------|------------|-------|----------------|---------|----------|--------------|
+| 54  | M  | ASY           | 140       | 239         | 0         | Normal     | 160   | N              | 1.2     | Flat     | 1            |
 
 
 
@@ -74,17 +75,18 @@ Each instance represents one patient. Example:
 
 | Field          | Type      | Description                                                   |
 |----------------|-----------|---------------------------------------------------------------|
-| Age            | int       | Patient age in years.                                         |
-| ChestPainType  | category  | Chest pain type (TA, ATA, NAP, ASY).                          |
-| RestingBP      | int       | Resting blood pressure (mm Hg).                               |
-| Cholesterol    | int       | Serum cholesterol (mg/dL).                                    |
-| FastingBS      | binary    | Fasting blood sugar (1 if >120 mg/dL, 0 otherwise).           |
-| RestingECG     | category  | Resting ECG results (Normal, ST, LVH).                        |
-| MaxHR          | int       | Maximum heart rate achieved.                                  |
-| ExerciseAngina | binary    | Exercise-induced angina (Y/N).                                |
-| Oldpeak        | float     | ST depression relative to rest.                               |
-| ST_Slope       | category  | Slope of the ST segment (Up, Flat, Down).                     |
-| HeartDisease   | binary    | Target variable (1 = disease, 0 = no disease).                |
+| Age            | int       | Patient age in years                                          |
+| Sex            | binary    | Patient sex (M = male, F = female)                            |
+| ChestPainType  | category  | Chest pain type (TA, ATA, NAP, ASY)                           |
+| RestingBP      | int       | Resting blood pressure (mm Hg)                                |
+| Cholesterol    | int       | Serum cholesterol (mg/dL)                                     |
+| FastingBS      | binary    | Fasting blood sugar (1 if >120 mg/dL, 0 otherwise)            |
+| RestingECG     | category  | Resting ECG results (Normal, ST, LVH)                         |
+| MaxHR          | int       | Maximum heart rate achieved                                   |
+| ExerciseAngina | binary    | Exercise-induced angina (Y/N)                                 |
+| Oldpeak        | float     | ST depression relative to rest                                |
+| ST_Slope       | category  | Slope of the ST segment (Up, Flat, Down)                      |
+| HeartDisease   | binary    | Target variable (1 = disease, 0 = no disease)                 |
 
 
 
@@ -106,9 +108,26 @@ The Kaggle author selected the 11 common features and merged the datasets into a
 
 All initial merging and normalization steps were performed by the dataset author on Kaggle.
 
+### Data Preprocessing
+
+The dataset underwent a preprocessing phase to correct inconsistencies and prepare the data for machine learning.
+The main steps were:
+
+- **Cleaning of invalid values**
+  Rows with impossible clinical values (e.g., `RestingBP = 0`) were removed.
+  Zero cholesterol values were treated as missing and replaced using a central-tendency statistic.
+
+- **Encoding of categorical variables**
+  Binary categories were converted to numerical format, while multi-class fields (`ChestPainType`, `RestingECG`, `ST_Slope`) were one-hot encoded.
+
+- **Scaling of numerical features**
+  Continuous variables were standardized to have mean 0 and unit variance.
+
+- **Removal of the `Sex` feature**
+  The Sex feature was removed to reduce potential fairness concerns and because it was not required for the planned experiments.
 
 
-### Who are the source data producers?
+### Who are the data producers?
 
 The original dataset was created and published by **[fedesoriano](https://www.kaggle.com/fedesoriano)** on Kaggle.  
 The preprocessed version included here was produced by the **CardioTrack** team for research and educational purposes.
