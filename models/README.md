@@ -41,7 +41,7 @@ The reported metrics were computed using the best model selected during cross va
 ### Datasets
 The evaluation was performed using 276 of 918 (30%) observations of the Kaggle's [Heart Failure Prediction Dataset](https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction), which contains clinical data from both healthy individuals and patients diagnosed with heart failure.
 ### Motivation
-This dataset was chosen because it provides a comprehensive set of relevant clinical features that capture key cardiovascular risk factors, enabling the model to perform early detection of heart failure in individual patients. Its publicly available nature ensures ransparency.
+This dataset was chosen because it provides a comprehensive set of relevant clinical features that capture key cardiovascular risk factors, enabling the model to perform early detection of heart failure in individual patients. Its publicly available nature ensures transparency.
 ### Preprocessing
 Before evaluation, the data was preprocessed as follows:
 - Normalization of continuous features using a Standard Scaler.
