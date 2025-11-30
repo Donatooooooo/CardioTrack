@@ -19,6 +19,7 @@ dependencies = [
     "asttokens>=3.0.0",
     "dagshub>=0.6.3",
     "great-expectations>=1.9.0",
+    "httpx>=0.28.1",
     "imbalanced-learn>=0.14.0",
     "ipykernel>=7.1.0",
     "kagglehub>=0.3.13",
