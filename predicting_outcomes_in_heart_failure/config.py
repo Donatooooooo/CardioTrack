@@ -36,7 +36,6 @@ MULTI_CAT = ["ChestPainType", "RestingECG", "ST_Slope"]
 
 INPUT_COLUMNS = [
     "Age",
-    "Sex",
     "RestingBP",
     "Cholesterol",
     "FastingBS",

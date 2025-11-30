@@ -9,7 +9,6 @@ from pydantic import BaseModel, field_validator
 
 class HeartSample(BaseModel):
     Age: int
-    Sex: Literal["M", "F"] | None = None
     ChestPainType: Literal["TA", "ATA", "NAP", "ASY"]
     RestingBP: int
     Cholesterol: int
