@@ -61,6 +61,7 @@ The Cardio Track ML system is intended to support clinical decision-making but n
 - **Clinical responsibility**: Diagnosis must be combined with patient history, exams, and expert judgment. Misuse in isolation could lead to incorrect interventions.  
 
 ## Caveats and Recommendations
+- **Inference time**: The model’s inference time is about 0.2 seconds, but it can varies with computing power where inference is run.
 - **Limitations**: The model is trained on a specific public dataset and may not capture rare cardiovascular conditions or population-specific variations.
 - **Data quality**: Accurate predictions depend on complete and correctly measured clinical features. Erroneous data can reduce performance. Missing data is not allowed.
 - **Not for emergency triage**: Predictions are intended for early detection and planning, not for immediate emergency decision-making.
