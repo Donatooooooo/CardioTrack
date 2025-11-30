@@ -117,7 +117,7 @@ FEMALE_CSV = INTERIM_DATA_DIR / "preprocessed_female_only.csv"
 PREPROCESS_ARTIFACTS_DIR = INTERIM_DATA_DIR / "preprocess_artifacts"
 SCALER_PATH = PREPROCESS_ARTIFACTS_DIR / "scaler.joblib"
 
-MODEL_PATH = Path("models/all/random_forest.joblib")
+MODEL_PATH = Path("models/nosex/random_forest.joblib")
 
 CARD_PATHS = {
     "dataset card": DATA_DIR / "README.md",
