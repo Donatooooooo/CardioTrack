@@ -82,3 +82,5 @@ stages:
         - predicting_outcomes_in_heart_failure/modeling/evaluate.py
         - models/${item.variant}/${item.model}.joblib
         - data/processed/${item.variant}/test.csv
+      outs:
+        - metrics/test/${item.variant}/${item.model}.json
