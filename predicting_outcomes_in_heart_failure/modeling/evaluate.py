@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 
 import dagshub
@@ -16,6 +17,7 @@ from predicting_outcomes_in_heart_failure.config import (
     REPO_NAME,
     REPO_OWNER,
     TARGET_COL,
+    TEST_METRICS_DIR,
     VALID_MODELS,
     VALID_VARIANTS,
 )
@@ -107,6 +109,24 @@ def evaluate_variant(variant: str, model_name: str | None = None):
             for k in ["test_f1", "test_recall", "test_accuracy", "test_roc_auc"]:
                 if k in metrics:
                     logger.info(f"  - {k}: {metrics[k]:.4f}")
+
+            metrics_dir = TEST_METRICS_DIR / variant
+            metrics_dir.mkdir(parents=True, exist_ok=True)
+
+            metrics_path = metrics_dir / f"{current_model_name}.json"
+
+            to_save = {
+                "variant": variant,
+                "model_name": current_model_name,
+                "metrics": metrics,
+            }
+
+            with open(metrics_path, "w", encoding="utf-8") as f:
+                json.dump(to_save, f, indent=4)
+
+            logger.info(
+                f"[{variant} | {current_model_name}] Saved test metrics locally → {metrics_path}"
+            )
 
             if (
                 metrics.get("test_f1", 0.0) >= 0.80
