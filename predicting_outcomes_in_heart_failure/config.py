@@ -107,6 +107,9 @@ MODELS_DIR = PROJ_ROOT / "models"
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
 
+METRICS_DIR = PROJ_ROOT / "metrics"
+TEST_METRICS_DIR = METRICS_DIR / "test"
+
 NOSEX_CSV = INTERIM_DATA_DIR / "preprocessed_no_sex_column.csv"
 MALE_CSV = INTERIM_DATA_DIR / "preprocessed_male_only.csv"
 FEMALE_CSV = INTERIM_DATA_DIR / "preprocessed_female_only.csv"
