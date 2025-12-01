@@ -7,6 +7,8 @@
 4. [Milestones Summary](#milestones-summary)  
    - [Milestone 1 - Inception](#milestone-1---inception)  
    - [Milestone 2 - Reproducibility](#milestone-2---reproducibility)
+   - [Milestone 3 - Quality Assurance](#milestone-3---quality-assurance)
+   - [Milestone 4 - API Integration](#milestone-4---API-Integration)
 
 ## Project Overview
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
@@ -181,7 +183,49 @@ We applied an explainability module:
 We added a **Risk Classification** analysis for the system in accordance with **IMDRF** and **AI Act** regulations.
 The documentation is available in the [`docs/`](./docs) folder.
 
+Ecco la versione finale **in Markdown puro**, già formattata correttamente:
 
 
+### Milestone 4 - API Integration
+
+During Milestone 4, we implemented a fully functional API and Dataset Card and Model card for the champion model and the following used dataset. 
+APIs are structured into four main routers:
+
+
+#### **General Router**
+- **GET /**  
+  Returns a welcome message and confirms that the API is running.
+
+
+#### **Prediction Router**
+- **POST /predictions**  
+  Generates a binary prediction (0/1) for a single patient sample.
+
+- **POST /predict-batch**  
+  Accepts a list of patient samples and returns a prediction for each element in the batch.
+
+- **POST /explanations**  
+  Produces SHAP-based explanations for a single input and returns the URL of the generated SHAP waterfall plot.
+
+
+#### **Model Info Router**
+- **GET /model/hyperparameters**  
+  Returns the hyperparameters and cross-validation results of the model defined in `MODEL_PATH`.
+
+- **GET /model/metrics**  
+  Returns the test-set metrics stored during the model evaluation stage.
+
+
+#### **Cards Router**
+- **GET /card/{card_type}**  
+  Returns the content of a “card” file (dataset card or model card).
+
+
+### **Cards**
+
+During this milestone, we also created:
+
+- a **dataset card** describing the dataset used by the champion model  
+- a **model card** documenting the champion model itself  
 
 
