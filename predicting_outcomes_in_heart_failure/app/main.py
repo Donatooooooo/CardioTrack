@@ -9,6 +9,7 @@ from predicting_outcomes_in_heart_failure.app.routers import (
     general,
     model_info,
     prediction,
+    cards
 )
 from predicting_outcomes_in_heart_failure.config import FIGURES_DIR, MODEL_PATH
 
@@ -46,3 +47,4 @@ app.mount("/figures", StaticFiles(directory=str(FIGURES_DIR)), name="figures")
 app.include_router(general.router)
 app.include_router(prediction.router)
 app.include_router(model_info.router)
+app.include_router(cards.router)
