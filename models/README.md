@@ -2,7 +2,7 @@
 ## Model Details
 - Developed by: D. Boccuzzi, M. Capone, F. Rosmarino
 - Model Date: November 11th, 2025
-- Model Version: 4
+- Model Version: 6 - nosex
 - Model Type: RandomForestClassifier
 ### Training information
 - Best hyperparameters tuned with a 5-fold cross validation:
