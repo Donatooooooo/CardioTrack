@@ -5,12 +5,7 @@ from fastapi.staticfiles import StaticFiles
 import joblib
 from loguru import logger
 
-from predicting_outcomes_in_heart_failure.app.routers import (
-    general,
-    model_info,
-    prediction,
-    cards
-)
+from predicting_outcomes_in_heart_failure.app.routers import cards, general, model_info, prediction
 from predicting_outcomes_in_heart_failure.config import FIGURES_DIR, MODEL_PATH
 
 
