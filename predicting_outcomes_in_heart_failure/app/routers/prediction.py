@@ -47,7 +47,7 @@ def predict(request: Request, payload: HeartSample):
     }
 
 
-@router.post("/predict-batch", tags=["Prediction"])
+@router.post("/batch-predictions", tags=["Prediction"])
 @construct_response
 def predict_batch(request: Request, payload: list[HeartSample]):
     model = get_model_from_state(request)
