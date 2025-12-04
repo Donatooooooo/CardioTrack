@@ -24,19 +24,6 @@ def test_preprocessing_produces_expected_columns(sample_raw_df_single):
     assert not processed.isna().any().any()
 
 
-def test_preprocessing_maps_sex_correctly(sample_raw_df_two_rows):
-    """
-    Given a DataFrame with Sex = [M, F],
-    we expect that after the preprocessing:
-      - Sex is mapped to [1, 0]
-    """
-
-    processed = preprocessing(sample_raw_df_two_rows)
-
-    sex_values = processed["Sex"].tolist()
-    assert sex_values == [1, 0]
-
-
 def test_preprocessing_encodes_exerciseAngina_binary(sample_raw_df_two_rows):
     """
     Given ExerciseAngina = [Y, N],
@@ -128,7 +115,6 @@ def test_preprocessing_adds_missing_dummy_columns_with_zeros():
     sample_df = pd.DataFrame(
         {
             "Age": [50, 60, 55],
-            "Sex": ["M", "F", "M"],
             "ChestPainType": ["ASY", "ASY", "ASY"],  # only ASY, never NAP/TA/etc.
             "RestingBP": [130, 140, 135],
             "Cholesterol": [220, 250, 230],

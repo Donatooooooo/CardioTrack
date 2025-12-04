@@ -36,7 +36,6 @@ MULTI_CAT = ["ChestPainType", "RestingECG", "ST_Slope"]
 
 INPUT_COLUMNS = [
     "Age",
-    "Sex",
     "RestingBP",
     "Cholesterol",
     "FastingBS",
@@ -107,6 +106,9 @@ MODELS_DIR = PROJ_ROOT / "models"
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
 
+METRICS_DIR = PROJ_ROOT / "metrics"
+TEST_METRICS_DIR = METRICS_DIR / "test"
+
 NOSEX_CSV = INTERIM_DATA_DIR / "preprocessed_no_sex_column.csv"
 MALE_CSV = INTERIM_DATA_DIR / "preprocessed_male_only.csv"
 FEMALE_CSV = INTERIM_DATA_DIR / "preprocessed_female_only.csv"
@@ -114,4 +116,9 @@ FEMALE_CSV = INTERIM_DATA_DIR / "preprocessed_female_only.csv"
 PREPROCESS_ARTIFACTS_DIR = INTERIM_DATA_DIR / "preprocess_artifacts"
 SCALER_PATH = PREPROCESS_ARTIFACTS_DIR / "scaler.joblib"
 
-MODEL_PATH = Path("models/all/random_forest.joblib")
+MODEL_PATH = Path("models/nosex/random_forest.joblib")
+
+CARD_PATHS = {
+    "dataset card": DATA_DIR / "README.md",
+    "model card": MODELS_DIR / "README.md",
+}

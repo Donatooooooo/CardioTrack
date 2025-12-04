@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 import joblib
 from loguru import logger
 import numpy as np
@@ -73,7 +75,6 @@ def main():
 
     sample = HeartSample(
         Age=54,
-        Sex="F",
         ChestPainType="ASY",
         RestingBP=140,
         Cholesterol=239,
@@ -96,9 +97,14 @@ def main():
     logger.success(f"Loaded model from {MODEL_PATH}")
 
     # Perform prediction
+    t0 = time.perf_counter()
     y_pred = model.predict(X)[0]
+    inference_time = time.perf_counter() - t0
     y_pred = int(y_pred) if np.issubdtype(type(y_pred), np.integer) else y_pred
-    result = {"prediction": y_pred}
+    result = {
+        "prediction": y_pred,
+        "inference_time_seconds": inference_time,
+    }
 
     # Explainability
     model = joblib.load(MODEL_PATH)
