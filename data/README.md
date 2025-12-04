@@ -10,7 +10,6 @@
   - [Data Fields](#data-fields)
 - [Dataset Creation](#dataset-creation)
   - [Source Data](#source-data)
-  - [Data Preprocessing](#data-preprocessing)
   - [Who are the data producers?](#who-are-the-data-producers)
   - [Annotations](#annotations)
   - [Personal and Sensitive Information](#personal-and-sensitive-information)
@@ -108,30 +107,11 @@ The Kaggle author selected the 11 common features and merged the datasets into a
 
 All initial merging and normalization steps were performed by the dataset author on Kaggle.
 
-### Data Preprocessing
-
-The dataset underwent a preprocessing phase to correct inconsistencies and prepare the data for machine learning.
-The main steps were:
-
-- **Cleaning of invalid values**
-  Rows with impossible clinical values (e.g., `RestingBP = 0`) were removed.
-  Zero cholesterol values were treated as missing and replaced using a central-tendency statistic.
-
-- **Encoding of categorical variables**
-  Binary categories were converted to numerical format, while multi-class fields (`ChestPainType`, `RestingECG`, `ST_Slope`) were one-hot encoded.
-
-- **Scaling of numerical features**
-  Continuous variables were standardized to have mean 0 and unit variance.
-
-- **Removal of the `Sex` feature**
-  The Sex feature was removed to reduce potential fairness concerns and because it was not required for the planned experiments.
-
 
 ### Who are the data producers?
 
 The original dataset was created and published by **[fedesoriano](https://www.kaggle.com/fedesoriano)** on Kaggle.  
 The preprocessed version included here was produced by the **CardioTrack** team for research and educational purposes.
-
 
 
 ### Annotations
@@ -174,7 +154,7 @@ This dataset may contain several sources of bias that can affect model performan
 
 - The data comes from multiple hospitals and countries, each with different patient profiles and clinical protocols. Some groups may be underrepresented.
 - Source datasets used different diagnostic practices and measurement standards, which may introduce noise or inconsistency in labels and clinical values.
-- Only 10 features are included, omitting other relevant clinical variables. This can cause proxy bias or oversimplification of cardiac risk.
+- Only 11 features are included, omitting other relevant clinical variables. This can cause proxy bias or oversimplification of cardiac risk.
 - Some datasets are older and may not reflect current medical practices or population characteristics.
 
 
