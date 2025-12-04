@@ -1,4 +1,34 @@
-# CardioTrack's Model Card
+# Model Card
+
+## Table of Contents
+
+- [Model Details](#model-details)
+  - [Training Information](#training-information)
+- [Intended Use](#intended-use)
+  - [Primary Intended Uses](#primary-intended-uses)
+  - [Primary Intended Users](#primary-intended-users)
+  - [Out-of-scope Use Cases](#out-of-scope-use-cases)
+- [Factors](#factors)
+  - [Relevant Factors](#relevant-factors)
+  - [Evaluation Factors](#evaluation-factors)
+
+- [Metrics](#metrics)
+  - [Model Performance](#model-performance)
+  - [Variation Approaches](#variation-approaches)
+
+- [Evaluation Data](#evaluation-data)
+  - [Datasets](#datasets)
+  - [Motivation](#motivation)
+  - [Preprocessing](#preprocessing)
+
+- [Training Data](#training-data)
+  - [Datasets](#datasets-1)
+  - [Preprocessing](#preprocessing-1)
+
+- [Ethical Considerations](#ethical-considerations)
+
+- [Caveats and Recommendations](#caveats-and-recommendations)
+
 ## Model Details
 - Developed by: D. Boccuzzi, M. Capone, F. Rosmarino
 - Model Date: November 11th, 2025
@@ -44,9 +74,21 @@ The evaluation was performed using 276 of 918 (30%) observations of the Kaggle's
 This dataset was chosen because it provides a comprehensive set of relevant clinical features that capture key cardiovascular risk factors, enabling the model to perform early detection of heart failure in individual patients. Its publicly available nature ensures transparency.
 ### Preprocessing
 Before evaluation, the data was preprocessed as follows:
-- Normalization of continuous features using a Standard Scaler.
-- One-hot encoding of categorical variables.
-- Removal of the sex feature, as model performance was unchanged with or without it.
+
+- **Cleaning of invalid values**
+  Rows with impossible clinical values (e.g., `RestingBP = 0`) were removed.
+  Zero cholesterol values were treated as missing and replaced using a central-tendency statistic.
+
+- **Encoding of categorical variables**
+  Binary categories were converted to numerical format, while multi-class fields (`ChestPainType`, `RestingECG`, `ST_Slope`) were one-hot encoded.
+
+- **Scaling of numerical features**
+  Continuous variables were standardized to have mean 0 and unit variance.
+
+- **Removal of the `Sex` feature**
+  The Sex feature was removed to reduce potential fairness concerns and because it was not required for the planned experiments.
+
+  - The processed dataset is versioned on Dagshub at following [link](https://dagshub.com/se4ai2526-uniba/CardioTrack)
 
 ## Training Data
 ### Datasets
