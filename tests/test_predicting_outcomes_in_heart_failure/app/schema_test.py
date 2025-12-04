@@ -9,7 +9,6 @@ def test_heartsample_valid_creation():
     """HeartSample should be created correctly with valid input data."""
     sample = HeartSample(
         Age=50,
-        Sex="M",
         ChestPainType="ATA",
         RestingBP=120,
         Cholesterol=220,
@@ -22,7 +21,6 @@ def test_heartsample_valid_creation():
     )
 
     assert sample.Age == 50
-    assert sample.Sex == "M"
     assert sample.ChestPainType == "ATA"
     assert sample.RestingBP == 120
     assert sample.Cholesterol == 220
@@ -32,7 +30,6 @@ def test_heartsample_round_oldpeak():
     """Oldpeak should be rounded to 2 decimal places by the field validator."""
     sample = HeartSample(
         Age=50,
-        Sex="F",
         ChestPainType="ASY",
         RestingBP=110,
         Cholesterol=200,
@@ -51,8 +48,7 @@ def test_heartsample_invalid_literal():
     """Invalid literal values should raise a ValueError during validation."""
     with pytest.raises(ValueError):
         HeartSample(
-            Age=40,
-            Sex="X",
+            Age="Quaranta",
             ChestPainType="ATA",
             RestingBP=120,
             Cholesterol=200,
@@ -69,7 +65,6 @@ def test_heartsample_to_dataframe():
     """to_dataframe() should return a single-row DataFrame with all fields."""
     sample = HeartSample(
         Age=60,
-        Sex="F",
         ChestPainType="NAP",
         RestingBP=130,
         Cholesterol=210,
@@ -86,5 +81,4 @@ def test_heartsample_to_dataframe():
     assert isinstance(df, pd.DataFrame)
     assert df.shape == (1, len(sample.model_dump()))
     assert df.loc[0, "Age"] == 60
-    assert df.loc[0, "Sex"] == "F"
     assert df.loc[0, "ST_Slope"] == "Down"

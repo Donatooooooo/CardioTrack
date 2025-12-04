@@ -8,7 +8,7 @@ from predicting_outcomes_in_heart_failure.config import CARD_PATHS
 router = APIRouter(tags=["Cards"])
 
 
-@router.get("/card/{Card_type}")
+@router.get("/cards/{Card_type}")
 @construct_response
 def card(request: Request, card_type: str):
     """Return card information.
