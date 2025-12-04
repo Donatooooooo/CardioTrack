@@ -10,7 +10,6 @@
   - [Data Fields](#data-fields)
 - [Dataset Creation](#dataset-creation)
   - [Source Data](#source-data)
-  - [Who are the data producers?](#who-are-the-data-producers)
   - [Annotations](#annotations)
   - [Personal and Sensitive Information](#personal-and-sensitive-information)
 - [Considerations for Using the Data](#considerations-for-using-the-data)
@@ -25,7 +24,6 @@
 ## Dataset Description
 
 - **Homepage:** https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction  
-- **Versioned Data Repository:** https://dagshub.com/se4ai2526-uniba/CardioTrack.s3
 
 
 ### Dataset Summary
@@ -108,11 +106,6 @@ The Kaggle author selected the 11 common features and merged the datasets into a
 All initial merging and normalization steps were performed by the dataset author on Kaggle.
 
 
-### Who are the data producers?
-
-The original dataset was created and published by **[fedesoriano](https://www.kaggle.com/fedesoriano)** on Kaggle.  
-The preprocessed version included here was produced by the **CardioTrack** team for research and educational purposes.
-
 
 ### Annotations
 
@@ -163,6 +156,8 @@ This dataset may contain several sources of bias that can affect model performan
 
 ### Dataset Curators
 
+The original dataset was created and published by **[fedesoriano](https://www.kaggle.com/fedesoriano)** on Kaggle.  
+
 The preprocessed dataset was curated by the **CardioTrack** team:
 
 - [Fabrizio Rosmarino](https://github.com/Fabrizio250)  
@@ -171,16 +166,11 @@ The preprocessed dataset was curated by the **CardioTrack** team:
 
 Work carried out as part of the *Software Engineering for AI-Enabled Systems* program at the University of Bari.
 
-
-
 ### Citation Information
 
-If you use this dataset, please cite:
+If you use this datasets, please cite:
 
 **Original Dataset**  
 Soriano, F. (2021). *Heart Failure Prediction Dataset*. Kaggle.  
 https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction
 
-**Preprocessed Version**  
-CardioTrack Team (2025). *Heart Disease Preprocessed Dataset*.  
-https://dagshub.com/se4ai2526-uniba/CardioTrack.s3
