@@ -2,6 +2,7 @@ from datetime import datetime
 from functools import wraps
 
 from fastapi import Request
+import gradio as gr
 from loguru import logger
 
 
@@ -31,3 +32,10 @@ def get_model_from_state(request: Request):
     if model is None:
         logger.error("Model not loaded in app.state.model")
     return model
+
+
+def load_page(io, fn):
+    model_card_content = gr.Markdown("Loading...")
+
+    io.load(fn=fn, inputs=None, outputs=model_card_content)
+    return io
