@@ -35,7 +35,7 @@ def get_model_from_state(request: Request):
 
 
 def load_page(io, fn):
-    model_card_content = gr.Markdown("Loading...")
+    content = gr.Markdown("Loading...")
 
-    io.load(fn=fn, inputs=None, outputs=model_card_content)
+    io.load(fn=fn, inputs=None, outputs=content)
     return io
