@@ -2,19 +2,18 @@ name: Lint (Ruff)
 on:
   pull_request:
 
-
 permissions:
-  contents: read 
-
+  contents: write
 
 jobs:
-  ruff:
+  ruff-check:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   
+          ref: ${{ github.head_ref }}
 
       # Install uv and activate cache
       - uses: astral-sh/setup-uv@v3
@@ -28,7 +27,9 @@ jobs:
       - name: Sync dev deps
         run: uv sync --dev
 
+      # 1️⃣ Trovo i file .py modificati e li salvo
       - name: Ruff on changed files (format then check)
+        id: ruff_check_changed_files
         run: |
           set -euo pipefail
           BASE_REF="${{ github.base_ref }}"
@@ -39,14 +40,86 @@ jobs:
           CHANGED=$(grep -E '\.py$' /tmp/changed_all.txt || true)
           if [ -z "$CHANGED" ]; then
             echo "Any Modified file .py: skip Ruff."
+            echo "has_py_changes=false" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          echo "Modified  Python FIles:"
+          echo "Modified Python Files:"
           echo "$CHANGED" | sed 's/^/ - /'
 
-          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff format --check
-          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff check --force-exclude
+          
+          echo "$CHANGED" > /tmp/changed_py.txt
+          echo "has_py_changes=true" >> $GITHUB_OUTPUT
+
+      # 2️⃣ Autofix + check finale
+      - name: Ruff autofix on changed files
+        if: steps.ruff_check_changed_files.outputs.has_py_changes == 'true'
+        run: |
+          set -euo pipefail
+
+          CHANGED=$(cat /tmp/changed_py.txt)
+
+          echo "Ruff autofix on these files:"
+          echo "$CHANGED" | sed 's/^/ - /'
+
+          # --- FIX ---
+          # Format (scrive le modifiche)
+          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff format || true
+
+          # Lint con fix
+          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff check --fix --force-exclude || true
+
+        
+
+      # 3️⃣ Commit on pull request 
+      - name: Commit and push changes
+        if: steps.ruff_check_changed_files.outputs.has_py_changes == 'true'
+        run: |
+          set -euo pipefail
+
+         
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit after Ruff autofix."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          git commit -m "chore: apply ruff check and format auto-fix"
+          git push origin HEAD:${{ github.head_ref }}
 
 
+  ruff-final-check:
+    runs-on: ubuntu-latest
+    needs: ruff-check
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      # Install uv and activate cache
+      - uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+
+      # Install dev deps
+      - name: Sync dev deps
+        run: uv sync --dev
+
+      - name: Final Ruff check
+        run: |
+          set -euo pipefail
+
+          echo "Running final Ruff checks on the repository..."
+
+          # These decide if the PR is green or red
+          uv run ruff format --check .
+          uv run ruff check --force-exclude .      
 
