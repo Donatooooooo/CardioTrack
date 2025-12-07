@@ -2,7 +2,7 @@ import httpx
 from loguru import logger
 import pandas as pd
 
-from predicting_outcomes_in_heart_failure.config import API_URL
+from predicting_outcomes_in_heart_failure.config import API_URL, FIGURES_DIR
 
 
 async def _fetch_api(endpoint: str):
@@ -17,7 +17,7 @@ async def _fetch_api(endpoint: str):
 
 
 class Wrapper:
-    async def prediction(
+    async def prediction_with_explanation(
         age,
         chest_pain_type,
         resting_bp,
@@ -29,31 +29,49 @@ class Wrapper:
         oldpeak,
         st_slope,
     ):
+        payload = {
+            "Age": age,
+            "ChestPainType": chest_pain_type,
+            "RestingBP": resting_bp,
+            "Cholesterol": cholesterol,
+            "FastingBS": fasting_bs,
+            "RestingECG": resting_ecg,
+            "MaxHR": max_hr,
+            "ExerciseAngina": exercise_angina,
+            "Oldpeak": round(oldpeak, 2),
+            "ST_Slope": st_slope,
+        }
+
         async with httpx.AsyncClient() as client:
             try:
-                payload = {
-                    "Age": age,
-                    "ChestPainType": chest_pain_type,
-                    "RestingBP": resting_bp,
-                    "Cholesterol": cholesterol,
-                    "FastingBS": fasting_bs,
-                    "RestingECG": resting_ecg,
-                    "MaxHR": max_hr,
-                    "ExerciseAngina": exercise_angina,
-                    "Oldpeak": round(oldpeak, 2),
-                    "ST_Slope": st_slope,
-                }
-                response = await client.post(f"{API_URL}/predictions", json=payload)
-                response.raise_for_status()
-                result = response.json()
+                pred_resp = await client.post(f"{API_URL}/predictions", json=payload)
+                pred_resp.raise_for_status()
+                pred_json = pred_resp.json()
 
-                prediction_value = result["data"]["prediction"]
-                result = "🆘" if prediction_value == 1 else "✅"
-
-                return f"# Patient's status: {result}"
+                prediction_value = pred_json["data"]["prediction"]
+                status = "🆘" if prediction_value == 1 else "✅"
+                status_text = f"# Patient's status: {status}"
             except Exception as e:
                 logger.error(f"Error making prediction: {e}")
-                return f"Error: {str(e)}"
+                return f"Error during prediction: {str(e)}", ""
+
+            try:
+                expl_resp = await client.post(f"{API_URL}/explanations", json=payload)
+                expl_resp.raise_for_status()
+                expl_json = expl_resp.json()
+
+                plot_rel_url = expl_json["data"].get("explanation_plot_url")
+                if not plot_rel_url:
+                    logger.warning("No explanation_plot_url found in /explanations response.")
+                    return status_text, ""
+
+                filename = plot_rel_url.split("/")[-1]
+                plot_path = FIGURES_DIR / filename
+                return status_text, str(plot_path)
+
+            except Exception as e:
+                logger.error(f"Error getting explanation: {e}")
+                return status_text, ""
 
     async def batch_prediction(file):
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -133,3 +151,58 @@ class Wrapper:
         for key, value in metrics.items():
             md += f"- **{key}**: {value:.4f}\n"
         return md
+
+    async def batch_explanation(file, patient_index: int):
+        """Return SHAP plot (filepath) for a specific patient in the uploaded CSV."""
+        try:
+            df = pd.read_csv(file)
+        except Exception as e:
+            logger.error(f"Error reading CSV for batch explanation: {e}")
+            return None
+
+        try:
+            idx = int(patient_index)
+        except (TypeError, ValueError):
+            logger.error(f"Invalid patient_index: {patient_index}")
+            return None
+
+        if idx < 0 or idx >= len(df):
+            logger.error(f"patient_index {idx} out of range (0..{len(df) - 1})")
+            return None
+
+        row = df.iloc[idx]
+
+        payload = {
+            "Age": int(row["Age"]),
+            "ChestPainType": row["ChestPainType"],
+            "RestingBP": int(row["RestingBP"]),
+            "Cholesterol": int(row["Cholesterol"]),
+            "FastingBS": int(row["FastingBS"]),
+            "RestingECG": row["RestingECG"],
+            "MaxHR": int(row["MaxHR"]),
+            "ExerciseAngina": row["ExerciseAngina"],
+            "Oldpeak": round(float(row["Oldpeak"]), 2),
+            "ST_Slope": row["ST_Slope"],
+        }
+
+        async with httpx.AsyncClient() as client:
+            try:
+                expl_resp = await client.post(f"{API_URL}/explanations", json=payload)
+                expl_resp.raise_for_status()
+                expl_json = expl_resp.json()
+
+                plot_rel_url = expl_json["data"].get("explanation_plot_url")
+                if not plot_rel_url:
+                    logger.warning(
+                        "No explanation_plot_url found in /explanations response (batch)."
+                    )
+                    return None
+
+                filename = plot_rel_url.split("/")[-1]
+                plot_path = FIGURES_DIR / filename
+
+                return str(plot_path)
+
+            except Exception as e:
+                logger.error(f"Error getting batch explanation: {e}")
+                return None
