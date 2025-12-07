@@ -102,8 +102,12 @@ with gr.Blocks(title="CardioTrack") as io:
             predict_btn = gr.Button("Predict", variant="primary")
             single_output = gr.Markdown(label="Prediction Result")
 
+            explanation_img = gr.Image(
+                label="Prediction explanation", type="filepath", visible=True
+            )
+
             predict_btn.click(
-                fn=Wrapper.prediction,
+                fn=Wrapper.prediction_with_explanation,
                 inputs=[
                     age,
                     chest_pain_type,
@@ -116,7 +120,7 @@ with gr.Blocks(title="CardioTrack") as io:
                     oldpeak,
                     st_slope,
                 ],
-                outputs=single_output,
+                outputs=[single_output, explanation_img],
             )
 
         with gr.TabItem("Batch Prediction"):
@@ -132,6 +136,27 @@ with gr.Blocks(title="CardioTrack") as io:
 
             batch_predict_btn.click(
                 fn=Wrapper.batch_prediction, inputs=file_input, outputs=batch_output
+            )
+
+            gr.Markdown("### Explain a specific patient from the batch")
+
+            patient_index = gr.Number(
+                label="Patient index (0-based)",
+                value=0,
+                precision=0,
+            )
+
+            batch_explain_btn = gr.Button("Explain selected patient", variant="secondary")
+
+            batch_explanation_img = gr.Image(
+                label="Batch prediction explanation (SHAP)",
+                type="filepath",
+            )
+
+            batch_explain_btn.click(
+                fn=Wrapper.batch_explanation,
+                inputs=[file_input, patient_index],
+                outputs=batch_explanation_img,
             )
 
         with gr.TabItem("ModelCard"):
