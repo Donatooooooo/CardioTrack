@@ -7,7 +7,7 @@ import joblib
 from loguru import logger
 
 from predicting_outcomes_in_heart_failure.app.routers import cards, general, model_info, prediction
-from predicting_outcomes_in_heart_failure.app.utils import load_page
+from predicting_outcomes_in_heart_failure.app.utils import load_page, update_patient_index_choices
 from predicting_outcomes_in_heart_failure.app.wrapper import Wrapper
 from predicting_outcomes_in_heart_failure.config import FIGURES_DIR, MODEL_PATH
 
@@ -140,10 +140,16 @@ with gr.Blocks(title="CardioTrack") as io:
 
             gr.Markdown("### Explain a specific patient from the batch")
 
-            patient_index = gr.Number(
+            patient_index = gr.Dropdown(
                 label="Patient index (0-based)",
-                value=0,
-                precision=0,
+                choices=[],
+                interactive=True,
+            )
+
+            batch_output.change(
+                fn=update_patient_index_choices,
+                inputs=batch_output,
+                outputs=patient_index,
             )
 
             batch_explain_btn = gr.Button("Explain selected patient", variant="secondary")

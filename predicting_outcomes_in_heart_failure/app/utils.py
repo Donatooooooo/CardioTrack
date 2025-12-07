@@ -39,3 +39,21 @@ def load_page(io, fn):
 
     io.load(fn=fn, inputs=None, outputs=content)
     return io
+
+
+def update_patient_index_choices(df):
+    """Populate the dropdown with valid patient indices from the batch results."""
+    import gradio as gr
+
+    if df is None:
+        return gr.update(choices=[], value=None)
+
+    try:
+        indices = list(df["Patients's index"].astype(int))
+    except Exception:
+        return gr.update(choices=[], value=None)
+
+    if not indices:
+        return gr.update(choices=[], value=None)
+
+    return gr.update(choices=indices, value=indices[0])

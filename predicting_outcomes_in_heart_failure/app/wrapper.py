@@ -49,7 +49,11 @@ class Wrapper:
                 pred_json = pred_resp.json()
 
                 prediction_value = pred_json["data"]["prediction"]
-                status = "🆘" if prediction_value == 1 else "✅"
+                status = (
+                    "🆘 At Risk (positive prediction)"
+                    if prediction_value == 1
+                    else "✅ No Risk Detected"
+                )
                 status_text = f"# Patient's status: {status}"
             except Exception as e:
                 logger.error(f"Error making prediction: {e}")
@@ -103,7 +107,9 @@ class Wrapper:
                     [
                         {
                             "Patients's index": r["index"],
-                            "Patient's status": "🆘" if r["prediction"] == 1 else "✅",
+                            "Patient's status": "🆘 At Risk (positive prediction)"
+                            if r["prediction"] == 1
+                            else "✅ No Risk Detected",
                         }
                         for r in results
                     ]
