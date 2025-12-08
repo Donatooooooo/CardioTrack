@@ -36,6 +36,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+if not FIGURES_DIR.exists():
+    logger.warning(f"Figures directory {FIGURES_DIR} does not exist. Creating it.")
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/figures", StaticFiles(directory=str(FIGURES_DIR)), name="figures")
 app.include_router(prediction.router)
 app.include_router(model_info.router)
