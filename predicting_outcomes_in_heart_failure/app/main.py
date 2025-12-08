@@ -53,8 +53,8 @@ with gr.Blocks(title="CardioTrack") as io:
     )
 
     with gr.Tabs():
-        with gr.TabItem("Analysis"):
-            gr.Markdown("### Enter patient data for the analysis")
+        with gr.TabItem("Single Diagnosis"):
+            gr.Markdown("### Enter patient data for the diagnosis")
 
             with gr.Row():
                 with gr.Column():
@@ -102,9 +102,7 @@ with gr.Blocks(title="CardioTrack") as io:
             predict_btn = gr.Button("Analyze", variant="primary")
             single_output = gr.Markdown(label="Result")
 
-            explanation_img = gr.Image(
-                label="Explanation", type="filepath", visible=True
-            )
+            explanation_img = gr.Image(label="Explanation", type="filepath", visible=True)
 
             predict_btn.click(
                 fn=Wrapper.prediction_with_explanation,
@@ -123,7 +121,7 @@ with gr.Blocks(title="CardioTrack") as io:
                 outputs=[single_output, explanation_img],
             )
 
-        with gr.TabItem("Group Analysis"):
+        with gr.TabItem("Group Diagnosis"):
             gr.Markdown("### Upload a CSV file for analize multiple subjects")
             gr.Markdown(
                 "The CSV should contain columns: Age, ChestPainType, RestingBP, Cholesterol,"
@@ -155,7 +153,7 @@ with gr.Blocks(title="CardioTrack") as io:
             batch_explain_btn = gr.Button("Explain selected patient", variant="secondary")
 
             batch_explanation_img = gr.Image(
-                label="Group explanation",
+                label="Explanation",
                 type="filepath",
             )
 
