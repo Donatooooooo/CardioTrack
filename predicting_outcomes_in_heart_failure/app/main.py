@@ -47,14 +47,14 @@ app.include_router(cards.router)
 with gr.Blocks(title="CardioTrack") as io:
     gr.Markdown(
         """
-        # 🫀 CardioTrack's Model Space - Heart Failure Prediction
+        # 🫀 CardioTrack's Model Space - Heart Failure Diagnosis
         Choose an area to access the platform's features.
         """
     )
 
     with gr.Tabs():
-        with gr.TabItem("Single Prediction"):
-            gr.Markdown("### Enter patient data for prediction")
+        with gr.TabItem("Analysis"):
+            gr.Markdown("### Enter patient data for the analysis")
 
             with gr.Row():
                 with gr.Column():
@@ -99,11 +99,11 @@ with gr.Blocks(title="CardioTrack") as io:
                         choices=["Up", "Flat", "Down"], label="ST Slope", value="Flat"
                     )
 
-            predict_btn = gr.Button("Predict", variant="primary")
-            single_output = gr.Markdown(label="Prediction Result")
+            predict_btn = gr.Button("Analyze", variant="primary")
+            single_output = gr.Markdown(label="Result")
 
             explanation_img = gr.Image(
-                label="Prediction explanation", type="filepath", visible=True
+                label="Explanation", type="filepath", visible=True
             )
 
             predict_btn.click(
@@ -123,22 +123,22 @@ with gr.Blocks(title="CardioTrack") as io:
                 outputs=[single_output, explanation_img],
             )
 
-        with gr.TabItem("Batch Prediction"):
-            gr.Markdown("### Upload a CSV file for batch predictions")
+        with gr.TabItem("Group Analysis"):
+            gr.Markdown("### Upload a CSV file for analize multiple subjects")
             gr.Markdown(
                 "The CSV should contain columns: Age, ChestPainType, RestingBP, Cholesterol,"
                 + "FastingBS, RestingECG, MaxHR, ExerciseAngina, Oldpeak, ST_Slope"
             )
 
             file_input = gr.File(label="Upload CSV", file_types=[".csv"])
-            batch_predict_btn = gr.Button("Predict Batch", variant="primary")
-            batch_output = gr.Dataframe(label="Batch Prediction Results")
+            batch_predict_btn = gr.Button("Analyze Group", variant="primary")
+            batch_output = gr.Dataframe(label="Results")
 
             batch_predict_btn.click(
                 fn=Wrapper.batch_prediction, inputs=file_input, outputs=batch_output
             )
 
-            gr.Markdown("### Explain a specific patient from the batch")
+            gr.Markdown("### Explain a specific patient from the group")
 
             patient_index = gr.Dropdown(
                 label="Patient index (0-based)",
@@ -155,7 +155,7 @@ with gr.Blocks(title="CardioTrack") as io:
             batch_explain_btn = gr.Button("Explain selected patient", variant="secondary")
 
             batch_explanation_img = gr.Image(
-                label="Batch prediction explanation (SHAP)",
+                label="Group explanation",
                 type="filepath",
             )
 
