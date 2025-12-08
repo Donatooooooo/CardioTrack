@@ -50,7 +50,7 @@ class Wrapper:
 
                 prediction_value = pred_json["data"]["prediction"]
                 status = (
-                    "🆘 At Risk (positive prediction)"
+                    "🆘 Risk Detected"
                     if prediction_value == 1
                     else "✅ No Risk Detected"
                 )
@@ -107,7 +107,7 @@ class Wrapper:
                     [
                         {
                             "Patients's index": r["index"],
-                            "Patient's status": "🆘 At Risk (positive prediction)"
+                            "Patient's status": "🆘 Risk Detected"
                             if r["prediction"] == 1
                             else "✅ No Risk Detected",
                         }
