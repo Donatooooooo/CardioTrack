@@ -37,7 +37,6 @@ app = FastAPI(
 )
 
 app.mount("/figures", StaticFiles(directory=str(FIGURES_DIR)), name="figures")
-app.include_router(general.router)
 app.include_router(prediction.router)
 app.include_router(model_info.router)
 app.include_router(cards.router)
@@ -177,4 +176,4 @@ with gr.Blocks(title="CardioTrack") as io:
             gr.Markdown("## Model Performance Metrics")
             io = load_page(io, Wrapper.get_metrics)
 
-app = gr.mount_gradio_app(app, io, path="/ui")
+app = gr.mount_gradio_app(app, io, path="/")
