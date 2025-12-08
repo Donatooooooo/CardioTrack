@@ -119,6 +119,11 @@ SCALER_PATH = PREPROCESS_ARTIFACTS_DIR / "scaler.joblib"
 MODEL_PATH = Path("models/nosex/random_forest.joblib")
 
 CARD_PATHS = {
-    "dataset card": DATA_DIR / "README.md",
-    "model card": MODELS_DIR / "README.md",
+    "dataset_card": DATA_DIR / "README.md",
+    "model_card": MODELS_DIR / "README.md",
 }
+
+# ----------------------------
+# API
+# ----------------------------
+API_URL = "http://localhost:8000"

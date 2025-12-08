@@ -8,20 +8,24 @@ from predicting_outcomes_in_heart_failure.config import CARD_PATHS
 router = APIRouter(tags=["Cards"])
 
 
-@router.get("/cards/{Card_type}")
+@router.get("/cards/{card_type}")
 @construct_response
 def card(request: Request, card_type: str):
     """Return card information.
-    card_type = dataset card / model card
+    card_type = dataset_card / model_card
     """
-    logger.info(f"Received /card/{card_type} request")
+    logger.info(f"Received /cards/{card_type} request")
+
+    # Normalizza il card_type per gestire eventuali varianti
+    card_type = card_type.lower().replace("-", "_")
 
     path = CARD_PATHS.get(card_type)
     if path is None:
         logger.warning(f"Unsupported card_type requested: {card_type}")
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Card type '{card_type}' not supported",
+            detail=f"Card type '{card_type}' not supported."
+            + f" Valid types: {', '.join(CARD_PATHS.keys())}",
         )
 
     try:
