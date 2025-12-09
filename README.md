@@ -1,3 +1,11 @@
+---
+title: CardioTrack API
+emoji: ❤️
+colorFrom: purple
+colorTo: gray
+sdk: docker
+app_port: 7860
+---
 # Predicting Outcomes in Heart Failure
 
 ## Table of Contents
