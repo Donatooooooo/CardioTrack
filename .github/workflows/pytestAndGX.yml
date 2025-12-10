@@ -32,7 +32,7 @@ jobs:
       #Install dvc 
       - name: Install DVC
         run: |
-          uv pip install "dvc[s3]""
+          uv pip install "dvc[s3]"
 
 
       - name: Configure DVC credentials
