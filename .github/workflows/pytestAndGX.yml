@@ -29,9 +29,11 @@ jobs:
       - name: Sync dependencies
         run: uv sync
 
-      #Install dvc
+      #Install dvc and s3 support
       - name: Install DVC
-        run: uv pip install dvc-s3
+        run: |
+          uv pip install "dvc[s3]"
+          uv pip install "botocore>=1.31.0"
 
 
       - name: Configure DVC credentials
