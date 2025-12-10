@@ -29,6 +29,15 @@ jobs:
       - name: Sync dependencies
         run: uv sync
 
+
+      - name: Configure DVC credentials
+        run: |
+          dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_TOKEN }}
+          dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_TOKEN }}
+
+      - name: Download data and models from DagsHub
+        run: dvc pull
+        
       # Run pytest tests
       - name: Run pytest tests
         run: |
