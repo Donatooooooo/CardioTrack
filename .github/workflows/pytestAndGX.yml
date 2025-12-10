@@ -31,16 +31,16 @@ jobs:
 
       #Install dvc
       - name: Install DVC
-        run: uv run pip install dvc
+        run: uv pip install dvc
 
 
       - name: Configure DVC credentials
         run: |
-          dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_TOKEN }}
-          dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_TOKEN }}
+          uv run dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_TOKEN }}
+          uv run dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_TOKEN }}
 
       - name: Download data and models from DagsHub
-        run: dvc pull
+        run: uv run dvc pull
 
       # Run pytest tests
       - name: Run pytest tests
