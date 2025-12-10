@@ -32,7 +32,8 @@ jobs:
       #Install dvc 
       - name: Install DVC
         run: |
-          uv pip install "dvc[s3]"
+          uv pip install "dvc-s3" "boto3>=1.36.0" "botocore>=1.36.0"
+          
 
 
       - name: Configure DVC credentials
