@@ -2,6 +2,7 @@ name: Lint (Ruff)
 on:
   pull_request:
 
+
 permissions:
   contents: write
 
@@ -27,7 +28,7 @@ jobs:
       - name: Sync dev deps
         run: uv sync --dev
 
-      # 1️⃣ Trovo i file .py modificati e li salvo
+      # find changed .py files
       - name: Ruff on changed files (format then check)
         id: ruff_check_changed_files
         run: |
@@ -51,9 +52,10 @@ jobs:
           echo "$CHANGED" > /tmp/changed_py.txt
           echo "has_py_changes=true" >> $GITHUB_OUTPUT
 
-      # 2️⃣ Autofix + check finale
+      # Autofix
       - name: Ruff autofix on changed files
         if: steps.ruff_check_changed_files.outputs.has_py_changes == 'true'
+        id: ruff_autofix
         run: |
           set -euo pipefail
 
@@ -63,15 +65,21 @@ jobs:
           echo "$CHANGED" | sed 's/^/ - /'
 
           # --- FIX ---
-          # Format (scrive le modifiche)
-          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff format || true
+          uv run ruff format $CHANGED || true
 
           # Lint con fix
-          echo "$CHANGED" | tr '\n' '\0' | xargs -0 -n 100 uv run ruff check --fix --force-exclude || true
+          uv run ruff check --fix $CHANGED || true
 
-        
+          if uv run ruff check $CHANGED 2>&1 | tee /tmp/ruff_check_result.txt; then
+            echo "No remaining issues"
+            echo "has_remaining_issues=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found remaining issues that cannot be auto-fixed"
+            echo "has_remaining_issues=true" >> $GITHUB_OUTPUT
+          fi
 
-      # 3️⃣ Commit on pull request 
+
+      #  Commit on pull request 
       - name: Commit and push changes
         if: steps.ruff_check_changed_files.outputs.has_py_changes == 'true'
         run: |
@@ -91,35 +99,10 @@ jobs:
           git push origin HEAD:${{ github.head_ref }}
 
 
-  ruff-final-check:
-    runs-on: ubuntu-latest
-    needs: ruff-check
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
-
-      # Install uv and activate cache
-      - uses: astral-sh/setup-uv@v3
-
-      - name: Cache uv
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/uv
-          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
-
-      # Install dev deps
-      - name: Sync dev deps
-        run: uv sync --dev
-
-      - name: Final Ruff check
+      # Fail if there are remaining issues
+      - name: Fail if remaining issues
+        if: steps.ruff_check_changed_files.outputs.has_py_changes == 'true' && steps.ruff_autofix.outputs.has_remaining_issues == 'true'
         run: |
-          set -euo pipefail
-
-          echo "Running final Ruff checks on the repository..."
-
-          # These decide if the PR is green or red
-          uv run ruff format --check .
-          uv run ruff check --force-exclude .      
-
+          echo "Found errors that cannot be auto-fixed:"
+          cat /tmp/ruff_check_result.txt
+          exit 1
