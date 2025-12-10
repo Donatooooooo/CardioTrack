@@ -29,6 +29,10 @@ jobs:
       - name: Sync dependencies
         run: uv sync
 
+      #Install dvc
+      - name: Install DVC
+        run: uv run pip install dvc
+
 
       - name: Configure DVC credentials
         run: |
@@ -37,7 +41,7 @@ jobs:
 
       - name: Download data and models from DagsHub
         run: dvc pull
-        
+
       # Run pytest tests
       - name: Run pytest tests
         run: |
