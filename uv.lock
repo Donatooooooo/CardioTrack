@@ -1625,6 +1625,7 @@ version = "0.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "asttokens" },
+    { name = "boto3" },
     { name = "dagshub" },
     { name = "great-expectations" },
     { name = "httpx" },
@@ -1657,6 +1658,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "asttokens", specifier = ">=3.0.0" },
+    { name = "boto3", specifier = ">=1.19.8" },
     { name = "dagshub", specifier = ">=0.6.3" },
     { name = "great-expectations", specifier = ">=1.9.0" },
     { name = "httpx", specifier = ">=0.28.1" },
