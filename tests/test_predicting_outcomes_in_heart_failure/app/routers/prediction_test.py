@@ -85,7 +85,7 @@ def test_predictions_single_ok(ensure_model_loaded):
 
 def test_predict_batch_two_samples_ok(ensure_model_loaded):
     """Test /predict-batch with two examples."""
-    response = client.post("/predict-batch", json=BATCH_PAYLOAD)
+    response = client.post("/batch-predictions", json=BATCH_PAYLOAD)
 
     assert response.status_code == HTTPStatus.OK
 
