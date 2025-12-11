@@ -1,0 +1,108 @@
+name: Lint (Ruff)
+on:
+  pull_request:
+
+
+permissions:
+  contents: write
+
+jobs:
+  ruff-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   
+          ref: ${{ github.head_ref }}
+
+      # Install uv and activate cache
+      - uses: astral-sh/setup-uv@v3
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+
+      # Install dev deps
+      - name: Sync dev deps
+        run: uv sync --dev
+
+      # find changed .py files
+      - name: Ruff on changed files (format then check)
+        id: ruff_check_changed_files
+        run: |
+          set -euo pipefail
+          BASE_REF="${{ github.base_ref }}"
+          git fetch --no-tags origin "$BASE_REF" --prune
+
+          git diff --name-only --diff-filter=ACMRT "origin/$BASE_REF...HEAD" > /tmp/changed_all.txt
+
+          CHANGED=$(grep -E '\.py$' /tmp/changed_all.txt || true)
+          if [ -z "$CHANGED" ]; then
+            echo "Any Modified file .py: skip Ruff."
+            echo "has_py_changes=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Modified Python Files:"
+          echo "$CHANGED" | sed 's/^/ - /'
+
+          
+          echo "$CHANGED" > /tmp/changed_py.txt
+          echo "has_py_changes=true" >> $GITHUB_OUTPUT
+
+      # Autofix
+      - name: Ruff autofix on changed files
+        if: steps.ruff_check_changed_files.outputs.has_py_changes == 'true'
+        id: ruff_autofix
+        run: |
+          set -euo pipefail
+
+          CHANGED=$(cat /tmp/changed_py.txt)
+
+          echo "Ruff autofix on these files:"
+          echo "$CHANGED" | sed 's/^/ - /'
+
+          # --- FIX ---
+          uv run ruff format $CHANGED || true
+
+          # Lint con fix
+          uv run ruff check --fix $CHANGED || true
+
+          if uv run ruff check $CHANGED 2>&1 | tee /tmp/ruff_check_result.txt; then
+            echo "No remaining issues"
+            echo "has_remaining_issues=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found remaining issues that cannot be auto-fixed"
+            echo "has_remaining_issues=true" >> $GITHUB_OUTPUT
+          fi
+
+
+      #  Commit on pull request 
+      - name: Commit and push changes
+        if: steps.ruff_check_changed_files.outputs.has_py_changes == 'true'
+        run: |
+          set -euo pipefail
+
+         
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit after Ruff autofix."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          git commit -m "chore: apply ruff check and format auto-fix"
+          git push origin HEAD:${{ github.head_ref }}
+
+
+      # Fail if there are remaining issues
+      - name: Fail if remaining issues
+        if: steps.ruff_check_changed_files.outputs.has_py_changes == 'true' && steps.ruff_autofix.outputs.has_remaining_issues == 'true'
+        run: |
+          echo "Found errors that cannot be auto-fixed:"
+          cat /tmp/ruff_check_result.txt
+          exit 1

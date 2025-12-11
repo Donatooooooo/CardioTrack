@@ -1,0 +1,80 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "predicting_outcomes_in_heart_failure"
+version = "0.0.1"
+description = "This project develops a predictive pipeline for patient outcome prediction in heart failure, using a publicly available dataset of clinical records. The goal is to design and evaluate machine learning models within a reproducible workflow that can be integrated into larger systems for clinical decision support. The workflow addresses data heterogeneity, defines consistent preprocessing and feature engineering strategies, and explores alternative modeling approaches with systematic evaluation using clinically relevant metrics. It also emphasizes model transparency and auditability, ensuring that the resulting pipeline can be deployed as a reliable, adaptable software component in healthcare applications. The project aims not only to improve baseline predictive performance but also to demonstrate how data-driven models can be effectively integrated into end-to-end AI-enabled healthcare systems."
+authors = [
+  { name = "CardioTrack" },
+]
+
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    
+]
+dependencies = [
+    "asttokens>=3.0.0",
+    "dagshub>=0.6.3",
+    "gradio>=6.0.2",
+    "great-expectations>=1.9.0",
+    "httpx>=0.28.1",
+    "imbalanced-learn>=0.14.0",
+    "ipykernel>=7.1.0",
+    "kagglehub>=0.3.13",
+    "loguru",
+    "matplotlib>=3.10.7",
+    "mkdocs",
+    "mlflow==2.22.0",
+    "numpy>=2.3.4",
+    "pandas>=2.3.3",
+    "pip",
+    "pytest",
+    "python-dotenv",
+    "ruff",
+    "scikit-learn>=1.7.2",
+    "seaborn>=0.13.2",
+    "shap>=0.50.0",
+    "tqdm",
+    "typer",
+]
+requires-python = "~=3.11.0"
+
+
+[tool.ruff]
+target-version = "py311"
+line-length = 99
+src = [
+    "predicting_outcomes_in_heart_failure",
+    "tests",
+]
+include = ["pyproject.toml", "predicting_outcomes_in_heart_failure/**/*.py", "tests/**/*.py",]
+extend-exclude = [
+  ".git/", ".venv/", ".ruff_cache/", ".mypy_cache/",
+  "data/", "artifacts/", "mlruns/", "notebooks/.ipynb_checkpoints/",
+]
+
+
+[tool.ruff.lint]
+# Enable sets of rules: basic style, static errors, import, upgrade, bugbear, simplify
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E203"]                 # compatibility with slicing and formatter
+per-file-ignores = {"tests/**" = ["S101", "D"], "notebooks/**" = ["E402", "F401", "D"]}
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true          # format code inside docstrings
+
+
+[dependency-groups]
+dev = [
+    "pynblint>=0.1.6",
+    "ruff>=0.14.2",
+]
+
