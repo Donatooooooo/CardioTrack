@@ -1,0 +1,77 @@
+name: Deploy
+on:
+  pull_request:
+    branches:
+      - deploy
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Install uv and activate cache
+      - uses: astral-sh/setup-uv@v3
+      
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+
+      # Install all dependencies
+      - name: Sync dependencies
+        run: uv sync
+
+      #Install dvc 
+      - name: Install DVC
+        run: |
+          uv pip install "dvc-s3" "boto3>=1.36.0" "botocore>=1.36.0"
+          
+
+
+      - name: Configure DVC credentials
+        run: |
+          uv run dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_TOKEN }}
+          uv run dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_TOKEN }}
+
+      - name: Download data and models from DagsHub
+        run: uv run dvc pull
+
+      # Run pytest tests
+      - name: Run pytest tests
+        run: |
+          set -euo pipefail
+          echo "Running pytest tests..."
+          uv run pytest tests/ -v --tb=short
+
+      # Run GX validation scripts
+      - name: Run GX validation scripts
+        run: |
+          set -euo pipefail
+          echo "Running GX validation scripts..."
+          uv run python tests/test_heart_data/raw_test.py
+          uv run python tests/test_heart_data/processed_test.py
+
+
+  deploy-to-hf:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrack
+          git push hf main
