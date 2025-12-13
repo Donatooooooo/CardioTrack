@@ -1,19 +1,71 @@
-name: Deploy
-on:
-  pull_request:
-    branches:
-      - deploy
+name: Deploy on HF
 
-permissions:
-  contents: write
+on:
+  push:
+    branches:
+      - deployTry
 
 jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deployTry
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync specific files to deploy branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          BRANCH="deploy"
+          
+          # folders and files to sync
+          ITEMS=(
+            "predict_outcomes_in_heart_failure"
+            "pyproject.toml"
+            "uv.lock"
+          )
+          
+          # Save items in /tmp
+          mkdir -p /tmp/to-deploy
+          for item in "${ITEMS[@]}"; do
+            if [ -e "$item" ]; then
+              mkdir -p "/tmp/to-deploy/$(dirname "$item")"
+              cp -r "$item" "/tmp/to-deploy/$item"
+            fi
+          done
+          
+          # change to deploy branch
+          git fetch origin $BRANCH
+          git checkout $BRANCH
+          
+          # Copy items from /tmp to current directory
+          for item in "${ITEMS[@]}"; do
+            if [ -e "/tmp/to-deploy/$item" ]; then
+              rm -rf "./$item"
+              mkdir -p "$(dirname "./$item")"
+              cp -r "/tmp/to-deploy/$item" "./$item"
+            fi
+          done
+          
+          # Commit e push
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Sync from main@${GITHUB_SHA::7}"
+            git push origin $BRANCH
+          fi
   test:
     runs-on: ubuntu-latest
+    needs: sync
     
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: deploy 
           fetch-depth: 0
 
       # Install uv and activate cache
@@ -61,12 +113,13 @@ jobs:
 
 
   deploy-to-hf:
-    needs: test
-    runs-on: ubuntu-latest
+    needs: [sync, test]
+    runs-on: ubuntu-latest 
     
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: deploy
           fetch-depth: 0
 
       - name: Push to Hugging Face Space
@@ -74,4 +127,5 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrack
-          git push hf main
+          git push hf deploy:main
+          
