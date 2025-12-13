@@ -6,7 +6,8 @@ on:
       - deployTry
 
 
-permission: write
+permissions:
+  contents: write
 
 jobs:
   sync:
