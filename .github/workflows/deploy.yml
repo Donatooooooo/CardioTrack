@@ -131,6 +131,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrack
+          git pull hf deploy:main || echo "No changes to pull"
           git push hf deploy:main
 
       - name: Sleep before checking deployment
