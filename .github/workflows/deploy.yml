@@ -1,7 +1,7 @@
 name: Deploy on HF
 
 on:
-  push:
+  pull_request:
     branches:
       - deployTry
 
