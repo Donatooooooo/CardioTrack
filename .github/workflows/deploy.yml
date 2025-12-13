@@ -126,12 +126,17 @@ jobs:
           ref: deploy
           fetch-depth: 0
 
+      - name: Configure git
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrack
-          git pull hf deploy:main || echo "No changes to pull"
+          git fetch hf main || echo "First push, no remote main yet"
           git push hf deploy:main
 
       - name: Sleep before checking deployment
@@ -141,6 +146,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          pip install huggingface-hub
           python -c "
           from huggingface_hub import HfApi, login
           login(token='${{ secrets.HF_TOKEN }}')
@@ -153,6 +159,5 @@ jobs:
           else:
               print('Deployment successful and running.')
           "
-
     
           
