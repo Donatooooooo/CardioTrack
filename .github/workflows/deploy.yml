@@ -137,6 +137,7 @@ jobs:
         run: |
           git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrack
           git fetch hf main || echo "First push, no remote main yet"
+          git pull hf deploy:main
           git push hf deploy:main
 
       - name: Sleep before checking deployment
