@@ -128,4 +128,26 @@ jobs:
         run: |
           git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrack
           git push hf deploy:main
+
+      - name: Sleep before checking deployment
+        run: sleep 180
+
+      - name: Check deployment status on Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -c "
+          from huggingface_hub import HfApi, login
+          login(token='${{ secrets.HF_TOKEN }}')
+          api = HfApi()
+          info = api.space_info('CardioTrack/CardioTrack')
+          print(f'Stage: {info.runtime.stage}')
+          if info.runtime.stage == 'ERROR':
+              print('Deployment failed!')
+              exit(1)
+          else:
+              print('Deployment successful and running.')
+          "
+
+    
           
