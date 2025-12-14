@@ -8,7 +8,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # install curl and certificates needed to install uv
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates \
+    curl ca-certificates git \
     && rm -rf /var/lib/apt/lists/*
 
 # create a non-root user for added security
@@ -26,15 +26,9 @@ COPY --chown=user pyproject.toml uv.lock ./
 RUN uv sync --locked --no-install-project
 
 # copy the rest of the files needed for inference
-COPY --chown=user predicting_outcomes_in_heart_failure ./predicting_outcomes_in_heart_failure
-COPY --chown=user models/nosex/random_forest.joblib ./models/nosex/random_forest.joblib
-COPY --chown=user reports/nosex/random_forest/cv_parameters.json ./reports/nosex/random_forest/cv_parameters.json
-COPY --chown=user data/interim/preprocess_artifacts/scaler.joblib ./data/interim/preprocess_artifacts/scaler.joblib
-COPY --chown=user metrics/test/nosex/random_forest.json ./metrics/test/nosex/random_forest.json
-COPY --chown=user README.md ./README.md
-COPY --chown=user models/README.md ./models/README.md
-COPY --chown=user data/README.md ./data/README.md
+COPY --chown=user . .
 
+RUN uv run dvc pull
 
 EXPOSE 7860
 
