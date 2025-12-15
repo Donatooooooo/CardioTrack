@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from predicting_outcomes_in_heart_failure.config import (
     MODELS_DIR,
-    PREPROCESSED_CSV,
+    NOSEX_CSV,
     TARGET_COL,
 )
 import pytest
@@ -11,8 +11,8 @@ import pytest
 
 @pytest.fixture
 def sample_features():
-    df = pd.read_csv(PREPROCESSED_CSV).iloc[100:].copy()
-    return df.iloc[[1]].drop(columns=[TARGET_COL])
+    df = pd.read_csv(NOSEX_CSV).copy()
+    return df.iloc[[0]].drop(columns=[TARGET_COL])
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def trained_models():
     Load all saved models.
     """
     models = {}
-    models_path = MODELS_DIR / "all"
+    models_path = MODELS_DIR / "nosex"
 
     for model_file in models_path.iterdir():
         if model_file.suffix == ".joblib":
@@ -79,11 +79,11 @@ class TestModelMinimumFunctionality:
 
     def test_correct_number_of_features(self, trained_models, sample_features):
         """
-        Models should expect exactly 18 features after preprocessing
+        Models should expect exactly 17 features after preprocessing
         """
 
         models = trained_models
-        expected_n_features = 18
+        expected_n_features = 17
 
         assert len(sample_features.columns) == expected_n_features, (
             f"Sample has {len(sample_features.columns)} columns, expected {expected_n_features}"

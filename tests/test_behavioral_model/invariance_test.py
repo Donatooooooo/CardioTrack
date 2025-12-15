@@ -1,14 +1,14 @@
 import joblib
 import numpy as np
 import pandas as pd
-from predicting_outcomes_in_heart_failure.config import MODELS_DIR, PREPROCESSED_CSV, TARGET_COL
+from predicting_outcomes_in_heart_failure.config import MODELS_DIR, NOSEX_CSV, TARGET_COL
 import pytest
 
 
 @pytest.fixture
 def sample_features():
-    df = pd.read_csv(PREPROCESSED_CSV).iloc[100:].copy()
-    return df.iloc[[1]].drop(columns=[TARGET_COL])
+    df = pd.read_csv(NOSEX_CSV).copy()
+    return df.iloc[[0]].drop(columns=[TARGET_COL])
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def trained_models():
     Load all saved models.
     """
     models = {}
-    models_path = MODELS_DIR / "all"
+    models_path = MODELS_DIR / "nosex"
 
     for model_file in models_path.iterdir():
         if model_file.suffix == ".joblib":
