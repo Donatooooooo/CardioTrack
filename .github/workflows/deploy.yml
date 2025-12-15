@@ -1,9 +1,9 @@
 name: Deploy on HF
 
 on:
-  pull_request:
+  push:
     branches:
-      - deployTry
+      - main
 
 
 permissions:
@@ -30,6 +30,9 @@ jobs:
             "predict_outcomes_in_heart_failure"
             "pyproject.toml"
             "uv.lock"
+            "dvc.yaml"
+            ".dvc"
+            "dvc.lock"
           )
           
           # Save items in /tmp
@@ -83,14 +86,7 @@ jobs:
 
       # Install all dependencies
       - name: Sync dependencies
-        run: uv sync
-
-      #Install dvc 
-      - name: Install DVC
-        run: |
-          uv pip install "dvc-s3" "boto3>=1.36.0" "botocore>=1.36.0"
-          
-
+        run: uv sync          
 
       - name: Configure DVC credentials
         run: |
@@ -152,7 +148,7 @@ jobs:
           api = HfApi()
           info = api.space_info('CardioTrack/CardioTrack')
           print(f'Stage: {info.runtime.stage}')
-          if info.runtime.stage == 'ERROR':
+          if info.runtime.stage == 'ERROR' or info.runtime.stage == 'BUILD_ERROR':
               print('Deployment failed!')
               exit(1)
           else:
