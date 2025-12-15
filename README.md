@@ -17,11 +17,22 @@ app_port: 7860
    - [Milestone 2 - Reproducibility](#milestone-2---reproducibility)
    - [Milestone 3 - Quality Assurance](#milestone-3---quality-assurance)
    - [Milestone 4 - API Integration](#milestone-4---API-Integration)
+   - [Milestone 5 - Deployment](#milestone-5---Deployment)
 
 ## Project Overview
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
+
+[![Ruff Linter](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/ruff-linter.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/ruff-linter.yml)
+
+[![PyNBLint](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pynblint.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pynblint.yml)
+
+[![Pytest & Great Expectations](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pytestAndGX.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pytestAndGX.yml)
+
+[![Deploy](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/deploy.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/deploy.yml)
+
+
 
 This project develops a predictive pipeline for patient outcome prediction in heart failure, using a publicly available dataset of clinical records. The goal is to design and evaluate machine learning models within a reproducible workflow that can be integrated into larger systems for clinical decision support. The workflow addresses data heterogeneity, defines consistent preprocessing and feature engineering strategies, and explores alternative modeling approaches with systematic evaluation using clinically relevant metrics. It also emphasizes model transparency and auditability, ensuring that the resulting pipeline can be deployed as a reliable, adaptable software component in healthcare applications. The project aims not only to improve baseline predictive performance but also to demonstrate how data-driven models can be effectively integrated into end-to-end AI-enabled healthcare systems.
 
@@ -191,8 +202,6 @@ We applied an explainability module:
 We added a **Risk Classification** analysis for the system in accordance with **IMDRF** and **AI Act** regulations.
 The documentation is available in the [`docs/`](./docs) folder.
 
-Ecco la versione finale **in Markdown puro**, già formattata correttamente:
-
 
 ### Milestone 4 - API Integration
 
@@ -202,14 +211,14 @@ APIs are structured into four main routers:
 
 #### **General Router**
 - **GET /**  
-  Returns a welcome message and confirms that the API is running.
+  Returns Gradio UI interface
 
 
 #### **Prediction Router**
 - **POST /predictions**  
   Generates a binary prediction (0/1) for a single patient sample.
 
-- **POST /predict-batch**  
+- **POST /batch-predictions**  
   Accepts a list of patient samples and returns a prediction for each element in the batch.
 
 - **POST /explanations**  
@@ -236,4 +245,37 @@ During this milestone, we also created:
 - a **dataset card** describing the dataset used by the champion model  
 - a **model card** documenting the champion model itself  
 
+
+### Milestone 5 - Deployment
+
+In this milestone, we implemented:
+
+#### User Interface
+A graphical interface based on *Gradio* was introduced to make the system accessible to non-technical users.
+
+Key improvements include:
+- Addition of a Gradio UI application.
+- Introduction of wrapper functions and a wrapper class to decouple UI and core logic.
+- Simplification of user interaction through more people-friendly outputs.
+
+**Explainability Support**
+Explainability was integrated into the application workflow and exposed through the interface.
+
+#### Containerization
+The project was prepared for container-based execution.
+
+- Addition of *Dockerfile* and *.dockerignore*.
+
+
+#### Continuos Integration
+The overall codebase quality was improved through automated linting and formatting.
+- GitHub Actions workflow for integration.
+- *Ruff* linter configured with automatic autofix.
+- Introduction of *pytest* for automated testing.
+- Integration of *Great Expectations* for automated data quality checks.
+
+
+#### Continuos Deployment
+Automated deployment to *Hugging Face* was implemented through Github Actions workflow
+*Hugging Face Space*: [Check Here](https://huggingface.co/spaces/CardioTrack/CardioTrack)
 
