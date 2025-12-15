@@ -1,0 +1,158 @@
+name: Deploy on HF
+
+on:
+  push:
+    branches:
+      - main
+
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deployTry
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync specific files to deploy branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          BRANCH="deploy"
+          
+          # folders and files to sync
+          ITEMS=(
+            "predict_outcomes_in_heart_failure"
+            "pyproject.toml"
+            "uv.lock"
+            "dvc.yaml"
+            ".dvc"
+            "dvc.lock"
+          )
+          
+          # Save items in /tmp
+          mkdir -p /tmp/to-deploy
+          for item in "${ITEMS[@]}"; do
+            if [ -e "$item" ]; then
+              mkdir -p "/tmp/to-deploy/$(dirname "$item")"
+              cp -r "$item" "/tmp/to-deploy/$item"
+            fi
+          done
+          
+          # change to deploy branch
+          git fetch origin $BRANCH
+          git checkout $BRANCH
+          
+          # Copy items from /tmp to current directory
+          for item in "${ITEMS[@]}"; do
+            if [ -e "/tmp/to-deploy/$item" ]; then
+              rm -rf "./$item"
+              mkdir -p "$(dirname "./$item")"
+              cp -r "/tmp/to-deploy/$item" "./$item"
+            fi
+          done
+          
+          # Commit e push
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Sync from main@${GITHUB_SHA::7}"
+            git push origin $BRANCH
+          fi
+  test:
+    runs-on: ubuntu-latest
+    needs: sync
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deploy 
+          fetch-depth: 0
+
+      # Install uv and activate cache
+      - uses: astral-sh/setup-uv@v3
+      
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+
+      # Install all dependencies
+      - name: Sync dependencies
+        run: uv sync          
+
+      - name: Configure DVC credentials
+        run: |
+          uv run dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_TOKEN }}
+          uv run dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_TOKEN }}
+
+      - name: Download data and models from DagsHub
+        run: uv run dvc pull
+
+      # Run pytest tests
+      - name: Run pytest tests
+        run: |
+          set -euo pipefail
+          echo "Running pytest tests..."
+          uv run pytest tests/ -v --tb=short
+
+      # Run GX validation scripts
+      - name: Run GX validation scripts
+        run: |
+          set -euo pipefail
+          echo "Running GX validation scripts..."
+          uv run python tests/test_heart_data/raw_test.py
+          uv run python tests/test_heart_data/processed_test.py
+
+
+  deploy-to-hf:
+    needs: [sync, test]
+    runs-on: ubuntu-latest 
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deploy
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrack
+          git push hf deploy:main --force
+      
+      - name: Sleep before checking deployment
+        run: sleep 180
+
+      - name: Check deployment status on Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          pip install huggingface-hub
+          python -c "
+          from huggingface_hub import HfApi, login
+          login(token='${{ secrets.HF_TOKEN }}')
+          api = HfApi()
+          info = api.space_info('CardioTrack/CardioTrack')
+          print(f'Stage: {info.runtime.stage}')
+          if info.runtime.stage == 'ERROR' or info.runtime.stage == 'BUILD_ERROR':
+              print('Deployment failed!')
+              exit(1)
+          else:
+              print('Deployment successful and running.')
+          "
+    
+          
