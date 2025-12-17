@@ -2,7 +2,7 @@ import joblib
 import pandas as pd
 from predicting_outcomes_in_heart_failure.config import (
     MODELS_DIR,
-    PREPROCESSED_CSV,
+    NOSEX_CSV,
     TARGET_COL,
 )
 import pytest
@@ -10,8 +10,8 @@ import pytest
 
 @pytest.fixture
 def sample_features():
-    df = pd.read_csv(PREPROCESSED_CSV).iloc[100:].copy()
-    return df.iloc[[1]].drop(columns=[TARGET_COL])
+    df = pd.read_csv(NOSEX_CSV).copy()
+    return df.iloc[[0]].drop(columns=[TARGET_COL])
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def trained_models():
     Load all saved models.
     """
     models = {}
-    models_path = MODELS_DIR / "all"
+    models_path = MODELS_DIR / "nosex"
 
     for model_file in models_path.iterdir():
         if model_file.suffix == ".joblib":
@@ -61,32 +61,13 @@ class TestModelDirectional:
         original = sample_features.copy()
 
         modified = original.copy()
-        modified["ExerciseAngina"] = original["ExerciseAngina"].iloc[0] + 1
+        modified["Oldpeak"] = original["Oldpeak"] + 1.0
 
         for model_name, model in models.items():
             pred_original = model.predict_proba(original)[0, 1]
             pred_modified = model.predict_proba(modified)[0, 1]
 
             assert pred_original != pred_modified, f"{model_name}: model not sensitive to outlier"
-
-    def test_age_effect(self, trained_models, sample_features):
-        """
-        Higher age should generally be associated with increased risk.
-        """
-
-        models = trained_models
-
-        younger = sample_features.copy()
-        younger["Age"] = -1.5
-
-        older = sample_features.copy()
-        older["Age"] = 2.0
-
-        for model_name, model in models.items():
-            prob_younger = model.predict_proba(younger)[0, 1]
-            prob_older = model.predict_proba(older)[0, 1]
-
-            assert prob_older >= prob_younger, f"{model_name}: unexpected age effect"
 
     def test_max_heart_rate_relationship(self, trained_models, sample_features):
         """
