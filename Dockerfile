@@ -28,25 +28,10 @@ RUN uv sync --locked --no-install-project
 # copy the rest of the files needed for inference
 COPY --chown=user . .
 
-# entrypoint
-RUN printf '%s\n' \
-  '#!/usr/bin/env sh' \
-  'set -e' \
-  '' \
-  'echo "[entrypoint] Checking DVC metadata..."' \
-  'if [ -d ".dvc" ] || [ -f "dvc.yaml" ]; then' \
-  '  echo "[entrypoint] Running dvc pull..."' \
-  '  uv run dvc pull -v' \
-  'else' \
-  '  echo "[entrypoint] No DVC metadata found, skipping dvc pull."' \
-  'fi' \
-  '' \
-  'exec "$@"' \
-  > /home/user/entrypoint.sh \
-  && chmod +x /home/user/entrypoint.sh
+RUN chmod +x predicting_outcomes_in_heart_failure/app/entrypoint.sh
 
 EXPOSE 7860
 
-ENTRYPOINT ["/home/user/entrypoint.sh"]
+ENTRYPOINT ["predicting_outcomes_in_heart_failure/app/entrypoint.sh"]
 
 CMD ["uv", "run", "uvicorn", "predicting_outcomes_in_heart_failure.app.main:app", "--host", "0.0.0.0", "--port", "7860"]
