@@ -135,7 +135,7 @@ jobs:
           git push hf deploy:main --force
       
       - name: Sleep before checking deployment
-        run: sleep 180
+        run: sleep 600
 
       - name: Check deployment status on Hugging Face
         env:
