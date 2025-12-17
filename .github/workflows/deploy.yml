@@ -5,18 +5,60 @@ on:
     branches:
       - main
 
-
 permissions:
   contents: write
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    needs: sync
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deploy 
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v3
+      
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+
+      - name: Sync dependencies
+        run: uv sync          
+
+      - name: Configure DVC credentials
+        run: |
+          uv run dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_TOKEN }}
+          uv run dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_TOKEN }}
+
+      - name: Download data and models from DagsHub
+        run: uv run dvc pull
+
+      - name: Run pytest tests
+        run: |
+          set -euo pipefail
+          echo "Running pytest tests..."
+          uv run pytest tests/ -v --tb=short
+
+      - name: Run GX validation scripts
+        run: |
+          set -euo pipefail
+          echo "Running GX validation scripts..."
+          uv run python tests/test_heart_data/raw_test.py
+          uv run python tests/test_heart_data/processed_test.py
+
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout deployTry
+      - name: Checkout deploy
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Sync specific files to deploy branch
         run: |
@@ -25,7 +67,6 @@ jobs:
           
           BRANCH="deploy"
           
-          # folders and files to sync
           ITEMS=(
             "predict_outcomes_in_heart_failure"
             "pyproject.toml"
@@ -33,9 +74,10 @@ jobs:
             "dvc.yaml"
             ".dvc"
             "dvc.lock"
+            "README.md"
+            "Dockerfile"
           )
-          
-          # Save items in /tmp
+
           mkdir -p /tmp/to-deploy
           for item in "${ITEMS[@]}"; do
             if [ -e "$item" ]; then
@@ -43,8 +85,7 @@ jobs:
               cp -r "$item" "/tmp/to-deploy/$item"
             fi
           done
-          
-          # change to deploy branch
+
           git fetch origin $BRANCH
           git checkout $BRANCH
           
@@ -65,52 +106,6 @@ jobs:
             git commit -m "Sync from main@${GITHUB_SHA::7}"
             git push origin $BRANCH
           fi
-  test:
-    runs-on: ubuntu-latest
-    needs: sync
-    
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: deploy 
-          fetch-depth: 0
-
-      # Install uv and activate cache
-      - uses: astral-sh/setup-uv@v3
-      
-      - name: Cache uv
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/uv
-          key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
-
-      # Install all dependencies
-      - name: Sync dependencies
-        run: uv sync          
-
-      - name: Configure DVC credentials
-        run: |
-          uv run dvc remote modify origin --local access_key_id ${{ secrets.DAGSHUB_TOKEN }}
-          uv run dvc remote modify origin --local secret_access_key ${{ secrets.DAGSHUB_TOKEN }}
-
-      - name: Download data and models from DagsHub
-        run: uv run dvc pull
-
-      # Run pytest tests
-      - name: Run pytest tests
-        run: |
-          set -euo pipefail
-          echo "Running pytest tests..."
-          uv run pytest tests/ -v --tb=short
-
-      # Run GX validation scripts
-      - name: Run GX validation scripts
-        run: |
-          set -euo pipefail
-          echo "Running GX validation scripts..."
-          uv run python tests/test_heart_data/raw_test.py
-          uv run python tests/test_heart_data/processed_test.py
-
 
   deploy-to-hf:
     needs: [sync, test]
