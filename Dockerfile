@@ -28,7 +28,8 @@ RUN uv sync --locked --no-install-project
 # copy the rest of the files needed for inference
 COPY --chown=user . .
 
-RUN chmod +x predicting_outcomes_in_heart_failure/app/entrypoint.sh
+RUN sed -i 's/\r$//' predicting_outcomes_in_heart_failure/app/entrypoint.sh \
+    && chmod +x predicting_outcomes_in_heart_failure/app/entrypoint.sh
 
 EXPOSE 7860
 
