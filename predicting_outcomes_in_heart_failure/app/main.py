@@ -10,7 +10,7 @@ from predicting_outcomes_in_heart_failure.app.routers import cards, model_info, 
 from predicting_outcomes_in_heart_failure.app.utils import load_page, update_patient_index_choices
 from predicting_outcomes_in_heart_failure.app.wrapper import Wrapper
 from predicting_outcomes_in_heart_failure.config import FIGURES_DIR, MODEL_PATH
-
+from predicting_outcomes_in_heart_failure.app.monitoring import instrumentator
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,6 +45,7 @@ app.include_router(prediction.router)
 app.include_router(model_info.router)
 app.include_router(cards.router)
 
+instrumentator.instrument(app).expose(app, include_in_schema=False, should_gzip=True)
 
 # UI Definition
 with gr.Blocks(title="CardioTrack") as io:
