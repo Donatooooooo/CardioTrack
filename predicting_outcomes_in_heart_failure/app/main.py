@@ -6,11 +6,12 @@ import gradio as gr
 import joblib
 from loguru import logger
 
+from predicting_outcomes_in_heart_failure.app.monitoring import instrumentator
 from predicting_outcomes_in_heart_failure.app.routers import cards, model_info, prediction
 from predicting_outcomes_in_heart_failure.app.utils import load_page, update_patient_index_choices
 from predicting_outcomes_in_heart_failure.app.wrapper import Wrapper
 from predicting_outcomes_in_heart_failure.config import FIGURES_DIR, MODEL_PATH
-from predicting_outcomes_in_heart_failure.app.monitoring import instrumentator
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -5,18 +5,18 @@ from typing import Any
 from fastapi import APIRouter, Request
 from loguru import logger
 import pandas as pd
+from predicting_outcomes_in_heart_failure.app.monitoring import (
+    batch_size_histogram,
+    explanation_counter,
+    model_error_counter,
+    prediction_counter,
+    prediction_processing_time,
+    prediction_result_counter,
+)
 from predicting_outcomes_in_heart_failure.app.schema import HeartSample
 from predicting_outcomes_in_heart_failure.app.utils import (
     construct_response,
     get_model_from_state,
-)
-from predicting_outcomes_in_heart_failure.app.monitoring import (
-    prediction_counter,
-    prediction_result_counter,
-    model_error_counter,
-    explanation_counter,
-    batch_size_histogram,
-    prediction_processing_time,
 )
 from predicting_outcomes_in_heart_failure.config import FIGURES_DIR, MODEL_PATH
 from predicting_outcomes_in_heart_failure.modeling.explainability import (
@@ -83,7 +83,9 @@ def predict_batch(request: Request, payload: list[HeartSample]):
 
     model = get_model_from_state(request)
     if model is None:
-        model_error_counter.labels(error_type="model_not_loaded", endpoint="/batch-predictions").inc()
+        model_error_counter.labels(
+            error_type="model_not_loaded", endpoint="/batch-predictions"
+        ).inc()
         return {
             "message": HTTPStatus.SERVICE_UNAVAILABLE.phrase,
             "status-code": HTTPStatus.SERVICE_UNAVAILABLE,
@@ -129,7 +131,9 @@ def predict_batch(request: Request, payload: list[HeartSample]):
             "data": data,
         }
     except Exception as e:
-        model_error_counter.labels(error_type="prediction_error", endpoint="/batch-predictions").inc()
+        model_error_counter.labels(
+            error_type="prediction_error", endpoint="/batch-predictions"
+        ).inc()
         logger.exception(f"Batch prediction error: {e}")
         raise
 
@@ -164,7 +168,9 @@ def explain(request: Request, payload: HeartSample):
             logger.warning("No explanation available for default model.")
     except Exception as e:
         logger.exception(f"Failed to compute explanation: {e}")
-        explanation_counter.labels(status="error_computation_failed", endpoint="/explanations").inc()
+        explanation_counter.labels(
+            status="error_computation_failed", endpoint="/explanations"
+        ).inc()
 
     try:
         plot_path = FIGURES_DIR / f"shap_waterfall_default_{model_type}.png"
@@ -178,7 +184,9 @@ def explain(request: Request, payload: HeartSample):
             data["explanation_plot_url"] = f"/figures/{saved_path.name}"
     except Exception as e:
         logger.exception(f"Failed to generate explanation plot: {e}")
-        explanation_counter.labels(status="error_plot_generation_failed", endpoint="/explanations").inc()
+        explanation_counter.labels(
+            status="error_plot_generation_failed", endpoint="/explanations"
+        ).inc()
 
     if explanation_success:
         explanation_counter.labels(status="success", endpoint="/explanations").inc()
