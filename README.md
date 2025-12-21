@@ -212,6 +212,11 @@ Additionally, the **"sex" feature showed a severe imbalance** in the dataset. Af
 
 The model deployed in production is **Random Forest without the "sex" feature**.
 
+| Model | Accuracy | F1 Score | Recall | ROC AUC |
+|-------|----------|----------|--------|---------|
+| **Random Forest No Sex** | 0.8877 | 0.8990 | 0.9019 | 0.9340 |
+
+
 ##### Rationale:
 
 1. **Best overall performance**: Random Forest consistently outperformed Decision Tree and Logistic Regression across all metrics.
