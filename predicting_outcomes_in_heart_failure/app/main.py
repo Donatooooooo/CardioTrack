@@ -6,6 +6,7 @@ import gradio as gr
 import joblib
 from loguru import logger
 
+from predicting_outcomes_in_heart_failure.app.monitoring import instrumentator
 from predicting_outcomes_in_heart_failure.app.routers import cards, model_info, prediction
 from predicting_outcomes_in_heart_failure.app.utils import load_page, update_patient_index_choices
 from predicting_outcomes_in_heart_failure.app.wrapper import Wrapper
@@ -45,6 +46,7 @@ app.include_router(prediction.router)
 app.include_router(model_info.router)
 app.include_router(cards.router)
 
+instrumentator.instrument(app).expose(app, include_in_schema=False, should_gzip=True)
 
 # UI Definition
 with gr.Blocks(title="CardioTrack") as io:
