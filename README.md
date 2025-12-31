@@ -27,7 +27,7 @@ app_port: 7860
    - [Milestone 3 - Quality Assurance](#milestone-3---quality-assurance)
    - [Milestone 4 - API Integration](#milestone-4---API-Integration)
    - [Milestone 5 - Deployment](#milestone-5---Deployment)
-   - [Milestone 6 - Monitoring](#milestone-6---Monitoring) <!-- To do -->  
+   - [Milestone 6 - Monitoring](#milestone-6---Monitoring)
 
 ## Project Summary
 
@@ -86,6 +86,7 @@ This project develops a complete, reproducible pipeline for predicting patient o
 │   ├── app/                                        <- FastAPI application code
 │   │   ├── __init__.py
 │   │   ├── main.py                                 <- FastAPI application entry point
+|   |   ├── monitoring.py                           <- Promtheus metrics for monitoring
 │   │   ├── schema.py                               <- Pydantic schemas for API validation
 │   │   ├── utils.py                                <- Utility functions for the API
 │   │   ├── wrapper.py                              <- Wrapper class for UI
@@ -184,7 +185,7 @@ Assesses model performance on the test set, computing F1 Score, Recall, Accuracy
 
 ### Experiments
 
-All experiments were tracked using **MLflow** and are available on [DagsHub](https://dagshub.com/se4ai2526-uniba/CardioTrack/experiments). For detailed metrics and run comparisons, please refer to the MLflow experiments dashboard.
+All experiments were tracked using **MLflow** and are available on [DagsHub platform](https://dagshub.com/se4ai2526-uniba/CardioTrack/experiments). For detailed metrics and run comparisons, please refer to the MLflow experiments dashboard.
 
 #### Experimental Setup
 
@@ -196,9 +197,9 @@ We evaluated three classification algorithms:
 
 ##### Handling Class Imbalance
 
-The target variable presented a significant class imbalance. To address this issue, we applied **Random Oversampling** to balance the training data, ensuring the model could learn effectively from both classes.
+The target variable presented a significant class imbalance. To address this issue, we applied **Random Oversampling** to balance data, ensuring the models could learn effectively from both classes.
 
-Additionally, the **"sex" feature showed a severe imbalance** in the dataset. After analyzing the model performance with and without this feature, we found that it provided minimal predictive value while potentially introducing unnecessary gender bias. Consequently, we decided to **remove the "sex" feature** from the final model to ensure fairness without sacrificing performance.
+Additionally, the **"sex" feature showed a severe imbalance** in the dataset. After analyzing the model performance with and without this feature, we found that it provided minimal predictive value while potentially introducing unnecessary gender bias. We also trained the models separately on only males and only females, but the performance was very poor, particularly for females. Consequently, we decided to remove the "sex" feature from the final model to ensure fairness without sacrificing performance.
 
 #### Results Summary
 
@@ -214,20 +215,18 @@ The model deployed in production is **Random Forest without the "sex" feature**.
 
 | Model | Accuracy | F1 Score | Recall | ROC AUC |
 |-------|----------|----------|--------|---------|
-| **Random Forest No Sex** | 0.8877 | 0.8990 | 0.9019 | 0.9340 |
+| **Random Forest No Sex** | 0.8877 | 0.8990 | 0.9020 | 0.9400 |
 
 
 ##### Rationale:
 
 1. **Best overall performance**: Random Forest consistently outperformed Decision Tree and Logistic Regression across all metrics.
 
-2. **Fairness considerations**: Removing the "sex" feature eliminates potential gender bias in predictions. The performance difference between the model with all features and the one without "sex" was negligible (< 1%), confirming that this feature was not discriminative for cardiovascular disease prediction.
+2. **Fairness considerations**: Removing the "sex" feature eliminates potential gender bias in predictions. The performance difference between the model with all features and the one without "sex" was negligible (< 1%).
 
 3. **Robustness**: Models trained on gender-specific subsets showed highly imbalanced performance, particularly poor results on the female subset due to data scarcity. The model without the "sex" feature generalizes better across both genders.
 
 4. **Ethical AI practices**: In medical applications, avoiding unnecessary use of sensitive attributes aligns with responsible AI principles and regulatory guidelines.
-
-
 
 ## Milestones Description
 
@@ -386,3 +385,4 @@ The overall codebase quality was improved through automated linting and formatti
 Automated deployment to *Hugging Face* was implemented through Github Actions workflow
 *Hugging Face Space*: [Check Here](https://huggingface.co/spaces/CardioTrack/CardioTrack)
 
+### Milestone 6 - Monitoring
