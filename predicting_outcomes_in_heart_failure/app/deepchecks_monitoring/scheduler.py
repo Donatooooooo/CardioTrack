@@ -41,6 +41,7 @@ def start_scheduler() -> None:
         trigger=CronTrigger(minute="*/5"),
         id="deepchecks_drift_job",
         replace_existing=True,
+        misfire_grace_time=120,
         max_instances=1,
         coalesce=True,
     )
