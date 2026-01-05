@@ -39,6 +39,19 @@ def _coerce_bool_like(df: pd.DataFrame) -> pd.DataFrame:
             df[col] = s.astype("int64")
     return df
 
+def _drift_score_to_float(drift_score: object) -> float:
+    if isinstance(drift_score, (int, float)):
+        return float(drift_score)
+
+    if isinstance(drift_score, dict):
+        if "value" in drift_score:
+            return float(drift_score["value"])
+        for v in drift_score.values():
+            if isinstance(v, (int, float)):
+                return float(v)
+
+    raise TypeError(f"Unsupported drift_score format: {type(drift_score)} -> {drift_score}")
+
 def run_drift_if_enough_rows(
     *,
     reference_csv: Path,
@@ -88,13 +101,38 @@ def run_drift_if_enough_rows(
     except TypeError:
         result = check.run(ref_ds, prod_ds)
 
+    raw = result.value
+
+    features = {
+        name: _drift_score_to_float(info.get("Drift score"))
+        for name, info in raw.items()
+    }
+
+    threshold = 0.2
+    above = [k for k, v in features.items() if v >= threshold]
+
+    output = {
+        "check": "FeatureDrift",
+        "method": "Kolmogorov-Smirnov",
+        "timestamp_utc": datetime.now(UTC).isoformat(),
+        "data": {
+            "reference_rows": len(ref_df),
+            "production_rows": len(prod_df),
+        },
+        "features": features,
+        "summary": {
+            "max_drift": max(features.values()),
+            "mean_drift": sum(features.values()) / len(features),
+            "threshold": threshold,
+            "features_above_threshold": above,
+            "n_features_above_threshold": len(above),
+        },
+    }
     reports_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(UTC).strftime("%Y-%m-%d_%H-%M-%S")
+    
     report_path = reports_dir / f"drift_result_{ts}.json"
-
-    raw_json = result.to_json(with_display=False)
-
-    report_path.write_text(raw_json, encoding="utf-8")
+    report_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
 
     logger.success(f"Deepchecks drift report generated: {report_path}")
 
