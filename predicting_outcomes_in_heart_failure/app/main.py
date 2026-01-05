@@ -6,6 +6,10 @@ import gradio as gr
 import joblib
 from loguru import logger
 
+from predicting_outcomes_in_heart_failure.app.deepchecks_monitoring.scheduler import (
+    shutdown_scheduler,
+    start_scheduler,
+)
 from predicting_outcomes_in_heart_failure.app.monitoring import instrumentator
 from predicting_outcomes_in_heart_failure.app.routers import cards, model_info, prediction
 from predicting_outcomes_in_heart_failure.app.utils import load_page, update_patient_index_choices
@@ -23,10 +27,14 @@ async def lifespan(app: FastAPI):
     logger.info(f"Loading default model from {MODEL_PATH} ...")
     app.state.model = joblib.load(MODEL_PATH)
     logger.success(f"Default model loaded from {MODEL_PATH}")
+    start_scheduler()
+    logger.info("Deepchecks scheduler started")
 
     try:
         yield
     finally:
+        shutdown_scheduler()
+        logger.info("Deepchecks scheduler stopped")
         app.state.model = None
         logger.info("Default model cleared on application shutdown")
 
