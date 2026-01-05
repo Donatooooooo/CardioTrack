@@ -35,18 +35,19 @@ This project develops a complete, reproducible pipeline for predicting patient o
 
 ## Project Organization
 ```
-├── LICENSE                                         <- Open-source license if one is chosen
 ├── Makefile                                        <- Makefile with convenience commands like `make data` or `make train`
 ├── README.md                                       <- The top-level README for developers using this project
 ├── pyproject.toml                                  <- Project configuration file with package metadata and tool configurations
 ├── uv.lock                                         <- Lock file for uv package manager
 ├── Dockerfile                                      <- Docker container configuration
+├── docker-compose.yml                              <- Local multi-service stack (API, Prometheus, Grafana, Locust)
+├── prometheus.yml                                  <- Prometheus scraping configuration
 ├── dvc.yaml                                        <- DVC pipeline configuration
 ├── dvc.lock                                        <- DVC pipeline lock file
 ├── .dockerignore
 ├── .dvcignore
 ├── .gitignore
-│
+├── .env                                            <- Local environment variables
 ├── .dvc/                                           <- DVC internal configuration and cache
 │
 ├── .github/
@@ -61,11 +62,22 @@ This project develops a complete, reproducible pipeline for predicting patient o
 │   ├── interim/                                    <- Intermediate data that has been transformed
 │   ├── processed/                                  <- The final, canonical data sets for modeling
 │   └── raw/                                        <- The original, immutable data dump
+|   └── monitoring/                                 <- Production inputs and drift monitoring data
+|       └── production_inputs.csv                   <- Collected production samples
+|       └── reports/                                <- Drift analysis outputs (JSON reports)
 │
 ├── docs/                                           <- Project documentation
 │   ├── .gitkeep
 │   ├── CardioTrack_ML_Canvas.md                    <- ML project canvas documentation
 │   └── Risk_Classification.md                      <- Risk classification methodology
+│
+├── grafana/
+│   ├── dashboards/                                 <- Grafana dashboards
+│   └── provisioning/                               <- Grafana datasources and dashboard provisioning
+│
+├── locust/
+│   ├── Dockerfile                                  <- Locust container build
+│   └── locustfile.py                               <- Load-testing scenarios for API endpoints
 │
 ├── metrics/                                        <- Model performance metrics and evaluation results
 │
@@ -77,7 +89,8 @@ This project develops a complete, reproducible pipeline for predicting patient o
 ├── references/                                     <- Data dictionaries, manuals, and all other explanatory materials
 │
 ├── reports/                                        <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures/                                    <- Generated graphics and figures to be used in reporting
+│   ├── figures/                                    <- Generated graphics and figures to be used in reporting
+│   └── pytest_report.html                          <- Pytest HTML test report
 │
 ├── predicting_outcomes_in_heart_failure/           <- Source code for use in this project
 │   ├── __init__.py
@@ -92,11 +105,16 @@ This project develops a complete, reproducible pipeline for predicting patient o
 │   │   ├── wrapper.py                              <- Wrapper class for UI
 │   │   ├── entrypoint.sh                           <- Container entrypoint script
 │   │   │
-│   │   └── routers/                                <- API route handlers
-│   │       ├── cards.py                            <- Cards-related endpoints
-│   │       ├── general.py                          <- General API endpoints
-│   │       ├── model_info.py                       <- Model information endpoints
-│   │       └── prediction.py                       <- Prediction endpoints
+│   │   ├── routers/                                <- API route handlers
+│   │   │   ├── cards.py                            <- Cards-related endpoints
+│   │   │   ├── general.py                          <- General API endpoints
+│   │   │   ├── model_info.py                       <- Model information endpoints
+│   │   │   └── prediction.py                       <- Prediction endpoints
+│   │   │
+│   │   └──deepchecks_monitoring/                   <- Data drift monitoring logic
+│   │       ├──drift_runner.py                      <- Drift computation
+│   │       ├──production_data_collector.py         <- Production data logging
+│   │       └──scheduler.py                         <- Scheduled drift jobs
 │   │
 │   ├── data/                                       <- Data processing modules
 │   │   ├── dataset.py                              <- Scripts to download or generate data
