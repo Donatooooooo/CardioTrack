@@ -9,6 +9,8 @@ services:
       - .env
     ports:
       - "7860:7860"
+    volumes:
+      - ./data:/cardioTrack/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7860/"]
       interval: 30s
