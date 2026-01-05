@@ -5,6 +5,9 @@ from typing import Any
 from fastapi import APIRouter, Request
 from loguru import logger
 import pandas as pd
+from predicting_outcomes_in_heart_failure.app.deepchecks_monitoring import (
+    production_data_collector as pdc,
+)
 from predicting_outcomes_in_heart_failure.app.monitoring import (
     batch_size_histogram,
     explanation_counter,
@@ -18,7 +21,12 @@ from predicting_outcomes_in_heart_failure.app.utils import (
     construct_response,
     get_model_from_state,
 )
-from predicting_outcomes_in_heart_failure.config import FIGURES_DIR, MODEL_PATH
+from predicting_outcomes_in_heart_failure.config import (
+    FIGURES_DIR,
+    INPUT_COLUMNS,
+    MODEL_PATH,
+    PRODUCTION_CSV_PATH,
+)
 from predicting_outcomes_in_heart_failure.modeling.explainability import (
     explain_prediction,
     save_shap_waterfall_plot,
@@ -48,6 +56,14 @@ def predict(request: Request, payload: HeartSample):
         X = preprocessing(X_raw)
         y_pred = int(model.predict(X)[0])
 
+        pdc.append_predictions_to_csv(
+            csv_path=PRODUCTION_CSV_PATH,
+            endpoint="/predictions",
+            X=X,
+            y_pred=y_pred,
+            feature_columns=list(INPUT_COLUMNS),
+        )
+        
         processing_time = time.time() - start_time
         prediction_processing_time.labels(
             prediction_type="single", endpoint="/predictions"
@@ -100,6 +116,14 @@ def predict_batch(request: Request, payload: list[HeartSample]):
 
         y_pred = [int(y) for y in model.predict(X)]
 
+        pdc.append_predictions_to_csv(
+            csv_path=PRODUCTION_CSV_PATH,
+            endpoint="/batch-predictions",
+            X=X,
+            y_pred=y_pred,
+            feature_columns=list(INPUT_COLUMNS),
+        )
+        
         processing_time = time.time() - start_time
         prediction_processing_time.labels(
             prediction_type="batch", endpoint="/batch-predictions"
