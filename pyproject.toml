@@ -16,6 +16,7 @@ classifiers = [
     
 ]
 dependencies = [
+    "apscheduler>=3.11.2",
     "asttokens>=3.0.0",
     "boto3>=1.36.0",
     "botocore>=1.36.0",
