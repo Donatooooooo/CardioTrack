@@ -63,7 +63,7 @@ def predict(request: Request, payload: HeartSample):
             y_pred=y_pred,
             feature_columns=list(INPUT_COLUMNS),
         )
-        
+
         processing_time = time.time() - start_time
         prediction_processing_time.labels(
             prediction_type="single", endpoint="/predictions"
@@ -123,7 +123,7 @@ def predict_batch(request: Request, payload: list[HeartSample]):
             y_pred=y_pred,
             feature_columns=list(INPUT_COLUMNS),
         )
-        
+
         processing_time = time.time() - start_time
         prediction_processing_time.labels(
             prediction_type="batch", endpoint="/batch-predictions"

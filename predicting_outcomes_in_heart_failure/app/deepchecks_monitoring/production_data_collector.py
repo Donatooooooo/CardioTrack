@@ -33,8 +33,7 @@ def append_predictions_to_csv(
 
     if len(df) != len(y_list):
         raise ValueError(
-            f"Row mismatch: X has {len(df)} rows "
-            f"but predictions has {len(y_list)} items"
+            f"Row mismatch: X has {len(df)} rows but predictions has {len(y_list)} items"
         )
     df.insert(0, "timestamp_utc", datetime.now(UTC).isoformat())
     df.insert(1, "endpoint", endpoint)

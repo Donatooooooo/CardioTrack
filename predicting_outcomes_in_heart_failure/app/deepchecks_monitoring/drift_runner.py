@@ -24,6 +24,7 @@ def _write_state(state_path: Path, state: dict) -> None:
     state_path.parent.mkdir(parents=True, exist_ok=True)
     state_path.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
+
 def _coerce_bool_like(df: pd.DataFrame) -> pd.DataFrame:
     """Converts columns with True/False values ​​to 0/1 int."""
     bool_map = {"true": 1, "false": 0, "1": 1, "0": 0, True: 1, False: 0}
@@ -39,6 +40,7 @@ def _coerce_bool_like(df: pd.DataFrame) -> pd.DataFrame:
             df[col] = s.astype("int64")
     return df
 
+
 def _drift_score_to_float(drift_score: object) -> float:
     if isinstance(drift_score, (int, float)):
         return float(drift_score)
@@ -51,6 +53,7 @@ def _drift_score_to_float(drift_score: object) -> float:
                 return float(v)
 
     raise TypeError(f"Unsupported drift_score format: {type(drift_score)} -> {drift_score}")
+
 
 def run_drift_if_enough_rows(
     *,
@@ -82,10 +85,9 @@ def run_drift_if_enough_rows(
 
     ref_df = pd.read_csv(reference_csv)
     prod_df = pd.read_csv(production_csv)
-    
+
     ref_df = _coerce_bool_like(ref_df)
     prod_df = _coerce_bool_like(prod_df)
-
 
     if feature_columns is not None:
         ref_df = ref_df[feature_columns]
@@ -103,10 +105,7 @@ def run_drift_if_enough_rows(
 
     raw = result.value
 
-    features = {
-        name: _drift_score_to_float(info.get("Drift score"))
-        for name, info in raw.items()
-    }
+    features = {name: _drift_score_to_float(info.get("Drift score")) for name, info in raw.items()}
 
     threshold = 0.2
     above = [k for k, v in features.items() if v >= threshold]
@@ -130,7 +129,7 @@ def run_drift_if_enough_rows(
     }
     reports_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(UTC).strftime("%Y-%m-%d_%H-%M-%S")
-    
+
     report_path = reports_dir / f"drift_result_{ts}.json"
     report_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
 

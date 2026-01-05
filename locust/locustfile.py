@@ -1,5 +1,7 @@
-from locust import HttpUser, between, task
 import random
+
+from locust import HttpUser, between, task
+
 
 def random_heart_sample() -> dict:
     return {
@@ -14,7 +16,8 @@ def random_heart_sample() -> dict:
         "Oldpeak": round(random.uniform(-2, 4), 1),
         "ST_Slope": random.choice(["Up", "Flat", "Down"]),
     }
-    
+
+
 class WebsiteUser(HttpUser):
     wait_time = between(1, 3)
 
@@ -45,7 +48,7 @@ class WebsiteUser(HttpUser):
             json=random_heart_sample(),
             name="/predictions (single)",
         )
-            
+
     @task(2)
     def predict_batch(self):
         batch_size = random.randint(5, 20)
@@ -55,8 +58,7 @@ class WebsiteUser(HttpUser):
             "/batch-predictions",
             json=payload,
             name="/batch-predictions",
-        )       
-
+        )
 
     @task(2)
     def explain_prediction(self):
