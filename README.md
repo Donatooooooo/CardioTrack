@@ -404,3 +404,24 @@ Automated deployment to *Hugging Face* was implemented through Github Actions wo
 *Hugging Face Space*: [Check Here](https://huggingface.co/spaces/CardioTrack/CardioTrack)
 
 ### Milestone 6 - Monitoring
+
+In this milestone, we implemented:
+
+### Infrastructure
+
+A multi-container monitoring stack was deployed using Docker Compose:
+- **Prometheus** for metrics collection
+- **Grafana** for visualization through a custom dashboard
+- **Locust** for load testing
+
+### Metrics & Load Testing
+
+- **Prometheus** collects application metrics in real-time
+- **Locust** simulates user traffic to evaluate system performance under load
+- **Grafana** aggregates the most relevant metrics and displays them in a purpose-built dashboard for analysis
+
+### Data Drift Monitoring
+
+Automated data drift detection was implemented:
+- **APScheduler** for scheduled data collection from production
+- **Deepchecks** for drift analysis on incoming data
