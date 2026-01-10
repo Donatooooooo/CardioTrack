@@ -215,38 +215,12 @@ docker-compose down
             └── test_explainability.py              <- Explainability tests
 ```
 
-## Pipeline Overview
+## CardioTrack Architecture
+![CardioTrack Architecture](reports/figures/cardiotrack_architecture.png)
+
+### DVC Pipeline Defined
 The project implements a **fully automated ML pipeline** using **DVC (Data Version Control)** to ensure reproducibility and traceability across all stages. The pipeline is structured into five sequential stages, each with a specific responsibility in the machine learning workflow.
-### Stages Defined
-```
-          +---------------+      
-          | download_data |
-          +---------------+
-                  *
-                  *
-                  *
-          +---------------+
-          | preprocessing |
-          +---------------+
-                  *
-                  *
-                  *
-            +------------+
-            | split_data |
-            +------------+
-           ***          ***
-          *                *
-        **                  ***
-+----------+                   *
-| training |                ***
-+----------+               *
-           ***          ***
-              *        *
-               **    **
-            +------------+
-            | evaluation |
-            +------------+
-```
+
 1. **download_data**
 Automatically download the raw dataset from Kaggle, eliminating manual download steps and ensuring control of the exact data used.
 2. **preprocessing**
@@ -325,7 +299,7 @@ We initialized **DVC** and configured a full pipeline to automate the main steps
 - **Data splitting**
 - **Training** and **evaluation**
 
-The pipeline is fully reproducible and version-controlled through DVC.
+The pipeline is fully reproducible and version-controlled through DVC. Morover, dvc pipeline defined uses `foreach` directive for parallelization across 4 data variants (all, female, male, nosex) and 3 models. All dependencies are automatically tracked ensuring the correct execution order.
 
 #### Model Training and Experiment Tracking
 We implemented the **training scripts** and integrated **MLflow** for experiment tracking.  
@@ -358,9 +332,16 @@ These validations help to:
 - prevent the propagation of data issues into downstream processes
 > **Important**: Great Expectation reports are available here [reports/great_expectation_reports](reports/great_expectation_reports)
 
-#### Code Quality
+#### Tests
+
+##### Code Quality
 We added automated **unit and integration tests** using **pytest**, covering the main modules and functionalities of the system.
-> **Important**: Pytest report is available here [reports/pytest_report](reports/pytest_report/pytest_report.html)
+> **Important**: Pytest report is available here [reports/pytest_report](reports/pytest_report/)
+
+##### Model Behavioral Testing
+We implemented **behavioral tests** to validate clinical correctness of predictions.
+
+> **Important**: Pytest report is available here [reports/pytest_report](reports/pytest_report/)
 
 #### ML Pipeline Enhancements
  we applied the following enhancements to the ML pipeline:
@@ -456,10 +437,24 @@ The overall codebase quality was improved through automated linting and formatti
 - Introduction of *pytest* for automated testing.
 - Integration of *Great Expectations* for automated data quality checks.
 
+**CI Workflows:**
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| ruff-linter.yml | Pull Request | Autofix + push style corrections |
+| pynblint.yml | PR on notebooks/** | Notebook-specific linting |
+| pytestAndGX.yml | PR (excludes main) | Tests + data quality validation |
+| deploy.yml | Push to main | sync → test → deploy to HF |
+
 
 #### Continuos Deployment
 Automated deployment to *Hugging Face* was implemented through Github Actions workflow
 *Hugging Face Space*: [Check Here](https://huggingface.co/spaces/CardioTrack/CardioTrack)
+
+**CD Workflow:**
+1. **test**: Run full test suite
+2. **sync**: Copy files from main to deploy branch
+3. **deploy-to-hf**: Push to HF Space + health check
 
 ### Milestone 6 - Monitoring
 
@@ -485,3 +480,5 @@ Additionally, we use **Uptime - Better Stack** for external uptime monitoring.
 Automated data drift detection was implemented:
 - **APScheduler** for scheduled data collection from production
 - **Deepchecks** for drift analysis on incoming data
+
+> **Important**: Further information about tests and monitoring can be found in [reports/README.md](reports/README.md)
