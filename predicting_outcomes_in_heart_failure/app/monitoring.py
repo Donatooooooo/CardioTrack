@@ -42,7 +42,7 @@ instrumentator.add(
         should_include_status=True,
         metric_namespace=NAMESPACE,
         metric_subsystem=SUBSYSTEM,
-         buckets=[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5],
+        buckets=[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5],
     )
 )
 
