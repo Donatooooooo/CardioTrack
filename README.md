@@ -19,10 +19,11 @@ app_port: 7860
 [![Deploy](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/deploy.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/deploy.yml)
 
 ## Table of Contents
-1. [Project Summary](#project-summary)  
-2. [Project Organization](#project-organization)
-3. [Pipeline Overview](#pipeline-overview) 
-4. [Milestones Description](#milestones-description)  
+1. [Project Summary](#project-summary)
+2. [Quick Start Guide](#quick-start-guide)
+3. [Project Organization](#project-organization)
+4. [Pipeline Overview](#pipeline-overview) 
+5. [Milestones Description](#milestones-description)  
    - [Milestone 1 - Inception](#milestone-1---inception)  
    - [Milestone 2 - Reproducibility](#milestone-2---reproducibility)
    - [Milestone 3 - Quality Assurance](#milestone-3---quality-assurance)
@@ -32,7 +33,62 @@ app_port: 7860
 
 ## Project Summary
 
-This project develops a complete, reproducible pipeline for predicting patient outcomes in heart failure, leveraging a publicly available clinical dataset. It addresses the challenges of heterogeneous data and ensures consistent preprocessing, model training, and evaluation, with a strong focus on transparency, reliability, and clinical relevance. The system provides explainable predictions and risk classifications, making it both interpretable and trustworthy. A user-friendly interface allows easy interaction with the models, and the entire pipeline is deployed on a publicly accessible Hugging Face Space, making advanced predictive analytics readily available for clinicians and researchers alike.
+This project develops a complete, reproducible pipeline for predicting patient outcomes in heart failure, leveraging a publicly available clinical dataset. It addresses the challenges of heterogeneous data and ensures consistent preprocessing, model training, and evaluation, with a strong focus on transparency, reliability, and clinical relevance. The system provides explainable predictions and risk classifications, making it both interpretable and trustworthy. A user-friendly interface allows easy interaction with the models, and the entire pipeline is deployed on a publicly accessible [Hugging Face Space](https://huggingface.co/spaces/CardioTrack/CardioTrack), making advanced predictive analytics readily available for clinicians and researchers alike.
+
+![Hf Space Overview](reports/figures/hf_space_overview.gif)
+
+## Quick Start Guide
+### Prerequisites
+
+- **Python 3.11**
+- **uv** - Fast Python package manager ([Official website](https://docs.astral.sh/uv/getting-started/installation/))
+- **DVC** - Data Version Control ([Official website](https://dvc.org/))
+- **Docker** and **Docker Compose** ([Official website](https://www.docker.com/))
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/se4ai2526-uniba/CardioTrack.git
+cd CardioTrack
+```
+
+### 2. Environment Variables
+
+Create a `.env` file in the project root with the following variables:
+
+```bash
+RUN_DVC_PULL=1
+AWS_ACCESS_KEY_ID=<your_dagshub_token>
+AWS_SECRET_ACCESS_KEY=<your_dagshub_token>
+```
+
+### 3. Launch the API Locally
+
+#### Docker Compose (Full Stack)
+
+This starts the API along with Prometheus, Grafana, and Locust for monitoring:
+
+```bash
+docker-compose up --build
+```
+
+Services available:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **CardioTrack API** | http://localhost:7860 | Main application with Gradio UI |
+| **Prometheus** | http://localhost:9090 | Metrics collection |
+| **Grafana** | http://localhost:4444 | Metrics dashboard (admin/admin_password) |
+| **Locust** | http://localhost:8089 | Load testing interface |
+
+To stop all services:
+
+```bash
+docker-compose down
+```
+
+> **Important:** For a more in-depth guide, see the Developer Guide at [docs/Developer_Guide.md](docs/Developer_Guide.md).
+
 
 ## Project Organization
 ```
@@ -253,7 +309,7 @@ The model deployed in production is **Random Forest without the "sex" feature**.
 During this milestone, the **CCDS Project Template** was used as the foundation for organizing the project.
 The main conceptual and structural components of the system were defined, following the template guidelines to ensure consistency and traceability.
 
-Additionally, a **Machine Learning Canvas** has been added in the [`docs/`](./docs) folder.
+Additionally, a **Machine Learning Canvas** has been added. To see it [docs/CardioTrack_ML_Canvas.md](docs/CardioTrack_ML_Canvas.md).
 It outlines the model objectives, the data to be used, and the key methodological aspects planned for the next phases of the project.
 
 ### Milestone 2 - Reproducibility
@@ -278,7 +334,7 @@ Three models are trained and evaluated within this workflow:
 - Random Forest  
 - Logistic Regression  
 
-Each experiment is logged to MLflow.
+Each experiment is logged to MLflow and they are all available [here](https://dagshub.com/se4ai2526-uniba/CardioTrack.mlflow).
 
 #### Model Registry and Thresholds
 Models that reach or exceed the predefined **performance thresholds** (as defined in the ML Canvas) are automatically **saved to the model registry**.  
@@ -300,10 +356,11 @@ These validations help to:
 
 - detect anomalies or invalid values at the data source
 - prevent the propagation of data issues into downstream processes
+> **Important**: Great Expectation reports are available here [reports/great_expectation_reports](reports/great_expectation_reports)
 
 #### Code Quality
 We added automated **unit and integration tests** using **pytest**, covering the main modules and functionalities of the system.
-
+> **Important**: Pytest report is available here [reports/pytest_report](reports/pytest_report/pytest_report.html)
 
 #### ML Pipeline Enhancements
  we applied the following enhancements to the ML pipeline:
@@ -325,7 +382,7 @@ We applied an explainability module:
 
 #### Risk Classification
 We added a **Risk Classification** analysis for the system in accordance with **IMDRF** and **AI Act** regulations.
-The documentation is available in the [`docs/`](./docs) folder.
+> **Important**: The Risk Classification is available here: [docs/Risk_Classification.md](docs/Risk_Classification.md) folder.
 
 
 ### Milestone 4 - API Integration
