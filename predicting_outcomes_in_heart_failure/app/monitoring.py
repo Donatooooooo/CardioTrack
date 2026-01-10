@@ -42,6 +42,7 @@ instrumentator.add(
         should_include_status=True,
         metric_namespace=NAMESPACE,
         metric_subsystem=SUBSYSTEM,
+         buckets=[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5],
     )
 )
 
@@ -90,5 +91,5 @@ prediction_processing_time = Histogram(
     name=f"{NAMESPACE}_{SUBSYSTEM}_prediction_processing_seconds",
     documentation="Time spent on prediction processing (excluding HTTP overhead)",
     labelnames=["prediction_type", "endpoint"],
-    buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0],
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0],
 )
