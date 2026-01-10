@@ -1,6 +1,6 @@
 # Reports
 
-This folder contains all the reports generated during the development and testing of the CardioTrack project, including test results, data validation reports, and monitoring figures.
+This folder contains all the reports generated during the development and testing of the CardioTrack project, including test results, data validation reports, and monitoring information.
 
 ## Folder Structure
 
@@ -29,15 +29,32 @@ Data quality is validated using Great Expectations. The HTML reports in `great_e
 
 ## Monitoring
 
+### Prometheus
+Prometheus is used to collect and store application metrics from the CardioTrack API. It enables real-time monitoring of prediction counts and processing latencies with custom metrics and general system health with deafult metrics.
+
+**Prometheus Configuration:**
+
+| Setting | Value | Rationale |
+|---------|-------|-----------|
+| Global scrape_interval | 15s | Standard for moderate workloads |
+| FastAPI scrape_interval | 5s | Higher granularity for application metrics |
+| metrics_path | /metrics | Prometheus standard endpoint |
+
+**Custom Metrics Exposed:**
+| Metric | Type | Purpose |
+|--------|------|---------|
+| cardiotrack_api_prediction_results_total | Counter | Track predictions by class (0/1) |
+| cardiotrack_api_prediction_processing_seconds | Histogram | Identify model bottlenecks (buckets: 0.001s-5s) |
+
 ### Uptime
 The Better Stack dashboard displays real-time uptime monitoring for the CardioTrack API hosted on Hugging Face Spaces. The CardioTrack-Monitoring-Alert monitor performs health checks every 3 minutes and is configured to automatically notify the team via email when incidents occur.
 ![API Uptime Monitoring](figures/uptime.png)
 
-## Load Testing - Locust 
+### Load Testing - Locust 
 
 Two distinct load tests were conducted using Locust to evaluate the behavior of the system under different execution conditions.
 
-### Load test 1 – Standard load scenario
+#### Load test 1 – Standard load scenario
 - Duration: 38 minutes
 - Total requests: 9,096
 - Failures: 0
@@ -50,7 +67,7 @@ The explainability endpoint (/explanations) was the most computationally expensi
 Overall, the system demonstrated high stability, good performance, and balanced behavior under sustained load.
 ![Locust Monitoring](figures/Locust_graph_1.png)
 
-### Load Test 2 – Constrained / Cold-Start Scenario
+#### Load Test 2 – Constrained / Cold-Start Scenario
 - Duration: 16 minutes
 - Total requests: 2,425
 - Failures: 0
@@ -60,7 +77,7 @@ In this second test, all endpoints exhibited very high response times, with aver
 Despite the extreme latencies, no requests failed, indicating that the system remained functionally stable. The observed performance degradation is consistent with a constrained execution context, from limited computational resources.
 ![Locust Monitoring](figures/Locust_graph_2.png)
 
-## Data Drift Monitoring - Deepchecks
+### Data Drift Monitoring - Deepchecks
 
 To ensure the long-term reliability of the CardioTrack predictive model, a dedicated **data drift monitoring process** has been implemented. The goal of this process is to continuously assess whether the statistical properties of incoming production data remain consistent with those observed during training, and to detect distribution shifts that may negatively impact model performance.
 
@@ -76,10 +93,4 @@ Two daily drift analyses are reported, illustrating different operating conditio
 In the [second run](reports/deepchecks_data_drift_reports/drift_result_2026-01-10_16-30-14.json), performed later the same day on a much smaller production sample, the overall drift was significantly lower, with only a single numerical feature slightly exceeding the threshold and all categorical features remaining stable. The reduced mean drift indicates a largely consistent data distribution with respect to the reference.
 
 Together, these results demonstrate that the adopted drift monitoring strategy is capable of capturing both significant and negligible distribution shifts, supporting informed MLOps decisions such as alerting, investigation, or model retraining when required.
-
-
-
-
-
-
 
