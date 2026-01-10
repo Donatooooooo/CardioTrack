@@ -112,7 +112,6 @@ def run_drift_if_enough_rows(
 
     output = {
         "check": "FeatureDrift",
-        "method": "Kolmogorov-Smirnov",
         "timestamp_utc": datetime.now(UTC).isoformat(),
         "data": {
             "reference_rows": len(ref_df),
