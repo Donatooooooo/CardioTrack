@@ -11,6 +11,7 @@ app_port: 7860
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/"><img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" /></a>
 [![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
 [![HuggingFace](https://img.shields.io/badge/Hugging_Face-Space-yellow)](https://huggingface.co/spaces/CardioTrack/CardioTrack)
+[![Better Stack Badge](https://uptime.betterstack.com/status-badges/v1/monitor/2cov5.svg)](https://uptime.betterstack.com/?utm_source=status_badge)
 
 [![Ruff Linter](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/ruff-linter.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/ruff-linter.yml)
 [![PyNBLint](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pynblint.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pynblint.yml)
@@ -197,9 +198,9 @@ Applies data transformations including cleaning invalid values, encoding categor
 3. **split_data**
 Divides the preprocessed data into **training (70%)** and **test (30%)** sets using stratified sampling. Splitting after preprocessing prevents data leakage by ensuring tuning hyperparameters is computed only on training data.
 4. **training**
-Trains three models (Decision Tree, Random Forest, Logistic Regression) with **5-fold cross-validation** for hyperparameter tuning. **RandomOverSampler** addresses class imbalance, and  **MLflow** tracks all experiments. Models meeting performance thresholds are saved to the registry.
+Trains three models (Decision Tree, Random Forest, Logistic Regression) with a **cross-validation strategy** for hyperparameter tuning. **RandomOverSampler** addresses class imbalance.
 5. **evaluation**
-Assesses model performance on the test set, computing F1 Score, Recall, Accuracy, and ROC-AUC.
+Assesses model performance on the independent test set, computing F1 Score, Recall, Accuracy, and ROC-AUC.
 
 ### Experiments
 
@@ -414,13 +415,15 @@ A multi-container monitoring stack was deployed using Docker Compose:
 - **Grafana** for visualization through a custom dashboard
 - **Locust** for load testing
 
-### Metrics & Load Testing
-
+### Resource Monitoring
+Using the infrastructure defined above, we perform internal resource monitoring:
 - **Prometheus** collects application metrics in real-time
 - **Locust** simulates user traffic to evaluate system performance under load
 - **Grafana** aggregates the most relevant metrics and displays them in a purpose-built dashboard for analysis
 
-### Data Drift Monitoring
+Additionally, we use **Uptime - Better Stack** for external uptime monitoring.
+
+### Performance Monitoring
 
 Automated data drift detection was implemented:
 - **APScheduler** for scheduled data collection from production
