@@ -6,9 +6,11 @@ This folder contains all the reports generated during the development and testin
 
 ```
 reports/
-├── figures/                        <- Monitoring charts and visualizations
-├── great_expectations_reports/     <- Data quality validation reports
-└── pytest_report/                  <- Unit and behavioral test report
+├── figures/                            <- Monitoring charts and visualizations
+├── great_expectations_reports/         <- Data quality validation reports
+├── pytest_report/                      <- Unit and behavioral test report
+├── deepchecks_data_drift_reports/      <- Deepchecks reports
+└── locust_reports/                     <- Locust reports
 ```
 
 ## Unit and behavioral test report
@@ -57,3 +59,27 @@ In this second test, all endpoints exhibited very high response times, with aver
 
 Despite the extreme latencies, no requests failed, indicating that the system remained functionally stable. The observed performance degradation is consistent with a constrained execution context, from limited computational resources.
 ![Locust Monitoring](figures/Locust_graph_2.png)
+
+## Data Drift Monitoring - Deepchecks
+
+To ensure the long-term reliability of the CardioTrack predictive model, a dedicated **data drift monitoring process** has been implemented. The goal of this process is to continuously assess whether the statistical properties of incoming production data remain consistent with those observed during training, and to detect distribution shifts that may negatively impact model performance.
+
+Feature-level drift detection is performed using **Deepchecks**, adopting statistical tests selected according to the nature of each feature:
+- **Kolmogorov–Smirnov test** for numerical features, used to compare empirical distributions between reference and production data.
+- **Cramér’s V** for categorical features, used to quantify changes in categorical distributions.
+
+
+The drift monitoring process is **automatically executed once per day at 21:00**, a time chosen to minimize interference with peak application traffic, as lower user activity is expected during evening hours.
+
+Two daily drift analyses are reported, illustrating different operating conditions. In the [first run](reports/deepchecks_data_drift_reports/drift_result_2026-01-10_11-10-05.json), conducted on a larger production sample, multiple features exceeded the configured drift threshold (0.2), resulting in a relatively high mean drift and indicating a significant shift in the data distribution compared to the reference dataset. This scenario represents a potential risk for model reliability and highlights the importance of continuous monitoring.
+
+In the [second run](reports/deepchecks_data_drift_reports/drift_result_2026-01-10_16-30-14.json), performed later the same day on a much smaller production sample, the overall drift was significantly lower, with only a single numerical feature slightly exceeding the threshold and all categorical features remaining stable. The reduced mean drift indicates a largely consistent data distribution with respect to the reference.
+
+Together, these results demonstrate that the adopted drift monitoring strategy is capable of capturing both significant and negligible distribution shifts, supporting informed MLOps decisions such as alerting, investigation, or model retraining when required.
+
+
+
+
+
+
+
