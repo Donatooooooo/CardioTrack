@@ -38,7 +38,7 @@ def start_scheduler() -> None:
 
     scheduler.add_job(
         drift_job,
-        trigger=CronTrigger(minute="*/5"),
+        trigger=CronTrigger(hour=21, minute=0),
         id="deepchecks_drift_job",
         replace_existing=True,
         misfire_grace_time=120,
