@@ -63,7 +63,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
+        "w": 10,
         "x": 0,
         "y": 0
       },
@@ -137,17 +137,15 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 12,
-        "x": 12,
+        "w": 7,
+        "x": 10,
         "y": 0
       },
       "id": 3,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
         "orientation": "auto",
-        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -155,9 +153,9 @@
           "fields": "",
           "values": false
         },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
       "pluginVersion": "12.3.1",
       "targets": [
@@ -176,12 +174,12 @@
         }
       ],
       "title": "Success rate",
-      "type": "stat"
+      "type": "gauge"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "ef7kueeszz6rke"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -189,67 +187,64 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
             }
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          "decimals": 0,
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "0"
+            },
+            "properties": [
               {
-                "color": "green",
-                "value": 0
+                "id": "displayName",
+                "value": "Healthy"
               }
             ]
           },
-          "unit": "req/s"
-        },
-        "overrides": []
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Heart Disease"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 6
+        "h": 6,
+        "w": 7,
+        "x": 17,
+        "y": 0
       },
-      "id": 2,
+      "id": 8,
       "options": {
         "legend": {
-          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "sort": "desc",
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -259,21 +254,15 @@
       "pluginVersion": "12.3.1",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ef7kueeszz6rke"
-          },
           "editorMode": "code",
-          "expr": "sum(rate(cardiotrack_api_http_requests_total[1m]))",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "__auto",
+          "expr": "sum by (prediction_class) (\r\n  increase(cardiotrack_api_prediction_results_total[5m])\r\n)",
+          "legendFormat": "{{prediction_class}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Request for second",
-      "type": "timeseries"
+      "title": "Prediction Distribution",
+      "type": "piechart"
     },
     {
       "datasource": {
@@ -360,13 +349,43 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/batch-predictions"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
           }
         ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
+        "h": 8,
+        "w": 24,
+        "x": 0,
         "y": 6
       },
       "id": 4,
@@ -398,13 +417,13 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "topk(\r\n  5,\r\n  sum by (handler) (\r\n    rate(cardiotrack_api_http_requests_total{\r\n      handler=~\"^/$|^/predictions$|^/batch-predictions$|^/explanations$|^/cards/.*|^/model/.*\"\r\n    }[5m])\r\n  )\r\n)\r\n",
-          "legendFormat": "__auto",
+          "expr": "topk(\r\n  5,\r\n  round(\r\n    sum by (handler) (\r\n      increase(cardiotrack_api_http_requests_total{\r\n        handler=~\"^/$|^/predictions$|^/batch-predictions$|^/explanations$|^/cards/.*|^/model/.*\"\r\n      }[5m])\r\n    )\r\n  )\r\n)",
+          "legendFormat": "{{endpoint}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Request by endpoint",
+      "title": "Request by endpoints",
       "type": "bargauge"
     },
     {
@@ -434,8 +453,8 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -451,6 +470,7 @@
               "mode": "off"
             }
           },
+          "decimals": 0,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -458,24 +478,20 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
-          "unit": "s"
+          "unit": "req/s"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 12,
+        "h": 7,
+        "w": 10,
         "x": 0,
-        "y": 13
+        "y": 14
       },
-      "id": 5,
+      "id": 2,
       "options": {
         "legend": {
           "calcs": [],
@@ -492,14 +508,20 @@
       "pluginVersion": "12.3.1",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ef7kueeszz6rke"
+          },
           "editorMode": "code",
-          "expr": "histogram_quantile(\r\n  0.95,\r\n  sum by (le) (\r\n    rate(cardiotrack_api_http_request_duration_seconds_bucket[5m])\r\n  )\r\n)\r\n",
+          "expr": "sum(rate(cardiotrack_api_http_requests_total[5m]))",
+          "hide": false,
+          "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "HTTP latency",
+      "title": "Total Requests",
       "type": "timeseries"
     },
     {
@@ -529,8 +551,112 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 10,
+        "y": 14
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(rate(cardiotrack_api_http_requests_total{status=\"4xx\"}[1m]))",
+          "legendFormat": "Client Errors",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(cardiotrack_api_http_requests_total{status=\"5xx\"}[1m]))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Server Errors",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Error rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -555,22 +681,26 @@
                 "value": 0
               },
               {
-                "color": "red",
-                "value": 80
+                "color": "dark-yellow",
+                "value": 0.1
+              },
+              {
+                "color": "dark-red",
+                "value": 0.25
               }
             ]
           },
-          "unit": "reqps"
+          "unit": "s"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 13
+        "h": 7,
+        "w": 7,
+        "x": 17,
+        "y": 14
       },
-      "id": 7,
+      "id": 11,
       "options": {
         "legend": {
           "calcs": [],
@@ -588,26 +718,13 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(cardiotrack_api_http_requests_total{status=\"4xx\"}[1m]))",
-          "legendFormat": "4xx Client Errors",
+          "expr": "histogram_quantile(\r\n 0.75,\r\n  sum by (le) (\r\n    rate(cardiotrack_api_prediction_processing_seconds_bucket[5m])\r\n  )\r\n)",
+          "legendFormat": "latency",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(cardiotrack_api_http_requests_total{status=\"5xx\"}[1m]))",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "5xx Server Errors",
-          "range": true,
-          "refId": "B"
         }
       ],
-      "title": "Error rate(4xx/ 5xx)",
+      "title": "Prediction Latency",
       "type": "timeseries"
     }
   ],
@@ -625,5 +742,5 @@
   "timezone": "browser",
   "title": "CardioTrack Monitoring",
   "uid": "ad26cm7",
-  "version": 22
+  "version": 26
 }
