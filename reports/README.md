@@ -31,14 +31,29 @@ Data quality is validated using Great Expectations. The HTML reports in `great_e
 The Better Stack dashboard displays real-time uptime monitoring for the CardioTrack API hosted on Hugging Face Spaces. The CardioTrack-Monitoring-Alert monitor performs health checks every 3 minutes and is configured to automatically notify the team via email when incidents occur.
 ![API Uptime Monitoring](figures/uptime.png)
 
-## Load Testing (Locust)
+## Load Testing - Locust 
 
-A load test was conducted using Locust over a period of 38 minutes, generating a total of 9,096 requests against the application (http://app:7860) with zero failures, demonstrating high system stability under sustained load.
+Two distinct load tests were conducted using Locust to evaluate the behavior of the system under different execution conditions.
 
-Lightweight endpoints for data access and metadata (/, /cards/*, /model/*) exhibited very low response times (≈15–20 ms on average), confirming excellent responsiveness.
-Prediction endpoints (/predictions and /batch-predictions) showed average latencies around 250 ms, consistent with real-time ML inference and suitable for interactive usage.
+### Load test 1 – Standard load scenario
+- Duration: 38 minutes
+- Total requests: 9,096
+- Failures: 0
 
+This test represents a standard and stable load scenario. Lightweight endpoints for navigation and metadata (/, /cards/*, /model/*) exhibited very low response times (≈15–20 ms on average), confirming high responsiveness.
+
+Prediction endpoints (/predictions and /batch-predictions) showed average latencies around 250 ms, consistent with real-time ML inference.
 The explainability endpoint (/explanations) was the most computationally expensive, with an average response time of approximately 3.4 s and peaks up to 21 s, which is expected given the complexity of model explanation processes.
 
-Overall, the system appears robust, performant, and well-balanced, with future optimization opportunities primarily focused on the explainability component.
+Overall, the system demonstrated high stability, good performance, and balanced behavior under sustained load.
 ![Locust Monitoring](figures/Locust_graph_1.png)
+
+### Load Test 2 – Constrained / Cold-Start Scenario
+- Duration: 16 minutes
+- Total requests: 2,425
+- Failures: 0
+
+In this second test, all endpoints exhibited very high response times, with average latencies in the range of 350–430 seconds and peaks close to 15 minutes. This behavior affected both lightweight endpoints and computationally intensive ones.
+
+Despite the extreme latencies, no requests failed, indicating that the system remained functionally stable. The observed performance degradation is consistent with a constrained execution context, from limited computational resources.
+![Locust Monitoring](figures/Locust_graph_2.png)
