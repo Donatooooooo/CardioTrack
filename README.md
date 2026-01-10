@@ -22,7 +22,7 @@ app_port: 7860
 1. [Project Summary](#project-summary)
 2. [Quick Start Guide](#quick-start-guide)
 3. [Project Organization](#project-organization)
-4. [Pipeline Overview](#pipeline-overview) 
+4. [CardioTrack Architecture](#cardiotrack-architecture)
 5. [Milestones Description](#milestones-description)  
    - [Milestone 1 - Inception](#milestone-1---inception)  
    - [Milestone 2 - Reproducibility](#milestone-2---reproducibility)
