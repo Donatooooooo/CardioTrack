@@ -43,7 +43,7 @@ This project develops a complete, reproducible pipeline for predicting patient o
 - **Python 3.11**
 - **uv** - Fast Python package manager ([Official website](https://docs.astral.sh/uv/getting-started/installation/))
 - **DVC** - Data Version Control ([Official website](https://dvc.org/))
-- **Docker** and **Docker Compose** ([Official website](https://www.docker.com/))
+- **Docker** ([Official website](https://www.docker.com/))
 
 ### 1. Clone the Repository
 
@@ -78,7 +78,7 @@ Services available:
 |---------|-----|-------------|
 | **CardioTrack API** | http://localhost:7860 | Main application with Gradio UI |
 | **Prometheus** | http://localhost:9090 | Metrics collection |
-| **Grafana** | http://localhost:4444 | Metrics dashboard (admin/admin_password) |
+| **Grafana** | http://localhost:4444 | Metrics dashboard |
 | **Locust** | http://localhost:8089 | Load testing interface |
 
 To stop all services:
@@ -87,7 +87,7 @@ To stop all services:
 docker-compose down
 ```
 
-> **Important:** For a more in-depth guide, see the Developer Guide at [docs/Developer_Guide.md](docs/Developer_Guide.md).
+> **Important:** For a more in-depth guide, if you want to modify code see the Developer Guide at [docs/Developer_Guide.md](docs/Developer_Guide.md).
 
 
 ## Project Organization
