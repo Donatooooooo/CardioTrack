@@ -110,7 +110,7 @@ Together, these results demonstrate that the adopted drift monitoring strategy i
 
 A centralized monitoring dashboard has been implemented using **Grafana** to provide real-time visibility into the CardioTrack API health and performance. The dashboard focuses on essential metrics only, keeping the visualization lightweight while still providing immediate answers to critical operational questions.
 
-![CardioTrack Grafana Dashboard](figures/grafana_dashboard.png)
+![CardioTrack Grafana Dashboard](figures/Grafana_Dashboard.png)
 
 *Figure: The Grafana monitoring dashboard developed for CardioTrack, captured during a load testing session. The top row shows service health, success rate, and prediction distribution; the bottom row displays request throughput, error rate, and model inference latency.*
 
