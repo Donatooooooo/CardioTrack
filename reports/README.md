@@ -2,6 +2,24 @@
 
 This folder contains all the reports generated during the development and testing of the CardioTrack project, including test results, data validation reports, and monitoring information.
 
+## Table of Contents
+
+- [Folder Structure](#folder-structure)
+- [Unit and behavioral test report](#unit-and-behavioral-test-report)
+  - [Behavioral Model Tests](#behavioral-model-tests)
+  - [Project Tests](#project-tests)
+- [Data Validation Reports](#data-validation-reports)
+- [Monitoring](#monitoring)
+  - [Prometheus](#prometheus)
+  - [Uptime](#uptime)
+  - [Load Testing - Locust](#load-testing---locust)
+    - [Load test 1 – Standard load scenario](#load-test-1--standard-load-scenario)
+    - [Load Test 2 – Constrained / Cold-Start Scenario](#load-test-2--constrained--cold-start-scenario)
+  - [Data Drift Monitoring - Deepchecks](#data-drift-monitoring---deepchecks)
+  - [Grafana Dashboard](#grafana-dashboard)
+    - [Dashboard Architecture](#dashboard-architecture)
+    - [Panel Overview](#panel-overview)
+
 ## Folder Structure
 
 ```
@@ -133,7 +151,7 @@ This separation allows operators to distinguish between infrastructure issues (s
 | Request by Endpoints | Infrastructure | Traffic breakdown by API endpoint |
 | Total Requests | Infrastructure | Real-time request throughput (req/s) |
 | Error Rate | Infrastructure | Rate of client (4xx) and server (5xx) errors |
-| Prediction Latency | Custom | P95 latency of model inference, excluding HTTP overhead |
+| Prediction Latency | Custom | Latency of model inference, excluding HTTP overhead |
 
 
 
