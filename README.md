@@ -6,126 +6,256 @@ colorTo: gray
 sdk: docker
 app_port: 7860
 ---
+
 # Predicting Outcomes in Heart Failure
-
-## Table of Contents
-1. [Project Overview](#project-overview)  
-2. [Project Organization](#project-organization)  
-3. [DVC Pipeline Defined](#dvc-pipeline-defined)  
-4. [Milestones Summary](#milestones-summary)  
-   - [Milestone 1 - Inception](#milestone-1---inception)  
-   - [Milestone 2 - Reproducibility](#milestone-2---reproducibility)
-   - [Milestone 3 - Quality Assurance](#milestone-3---quality-assurance)
-   - [Milestone 4 - API Integration](#milestone-4---API-Integration)
-   - [Milestone 5 - Deployment](#milestone-5---Deployment)
-
-## Project Overview
-<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
-    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
-</a>
+<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/"><img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" /></a>
+[![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
+[![HuggingFace](https://img.shields.io/badge/Hugging_Face-Space-yellow)](https://huggingface.co/spaces/CardioTrack/CardioTrack)
+[![Better Stack Badge](https://uptime.betterstack.com/status-badges/v1/monitor/2cov5.svg)](https://uptime.betterstack.com/?utm_source=status_badge)
 
 [![Ruff Linter](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/ruff-linter.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/ruff-linter.yml)
 [![PyNBLint](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pynblint.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pynblint.yml)
 [![Pytest & Great Expectations](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pytestAndGX.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/pytestAndGX.yml)
 [![Deploy](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/deploy.yml/badge.svg)](https://github.com/se4ai2526-uniba/CardioTrack/actions/workflows/deploy.yml)
-[![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
 
+## Table of Contents
+1. [Project Summary](#project-summary)
+2. [Quick Start Guide](#quick-start-guide)
+3. [Project Organization](#project-organization)
+4. [CardioTrack Architecture](#cardiotrack-architecture)
+5. [Milestones Description](#milestones-description)  
+   - [Milestone 1 - Inception](#milestone-1---inception)  
+   - [Milestone 2 - Reproducibility](#milestone-2---reproducibility)
+   - [Milestone 3 - Quality Assurance](#milestone-3---quality-assurance)
+   - [Milestone 4 - API Integration](#milestone-4---API-Integration)
+   - [Milestone 5 - Deployment](#milestone-5---Deployment)
+   - [Milestone 6 - Monitoring](#milestone-6---Monitoring)
 
-This project develops a predictive pipeline for patient outcome prediction in heart failure, using a publicly available dataset of clinical records. The goal is to design and evaluate machine learning models within a reproducible workflow that can be integrated into larger systems for clinical decision support. The workflow addresses data heterogeneity, defines consistent preprocessing and feature engineering strategies, and explores alternative modeling approaches with systematic evaluation using clinically relevant metrics. It also emphasizes model transparency and auditability, ensuring that the resulting pipeline can be deployed as a reliable, adaptable software component in healthcare applications. The project aims not only to improve baseline predictive performance but also to demonstrate how data-driven models can be effectively integrated into end-to-end AI-enabled healthcare systems.
+## Project Summary
+
+This project develops a complete, reproducible pipeline for predicting patient outcomes in heart failure, leveraging a publicly available clinical dataset. It addresses the challenges of heterogeneous data and ensures consistent preprocessing, model training, and evaluation, with a strong focus on transparency, reliability, and clinical relevance. The system provides explainable predictions and risk classifications, making it both interpretable and trustworthy. A user-friendly interface allows easy interaction with the models, and the entire pipeline is deployed on a publicly accessible [Hugging Face Space](https://huggingface.co/spaces/CardioTrack/CardioTrack). Below, an example of interaction with the system is shown:
+
+![Hf Space Overview](reports/figures/hf_space_overview.gif)
+
+## Quick Start Guide
+### Prerequisites
+
+- **Python 3.11**
+- **uv** - Fast Python package manager ([Official website](https://docs.astral.sh/uv/getting-started/installation/))
+- **DVC** - Data Version Control ([Official website](https://dvc.org/))
+- **Docker** ([Official website](https://www.docker.com/))
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/se4ai2526-uniba/CardioTrack.git
+cd CardioTrack
+```
+
+### 2. Environment Variables
+
+Create a `.env` file in the project root with the following variables:
+
+```bash
+RUN_DVC_PULL=1
+AWS_ACCESS_KEY_ID=<your_dagshub_token>
+AWS_SECRET_ACCESS_KEY=<your_dagshub_token>
+```
+
+### 3. Launch the API Locally
+
+#### Docker Compose (Full Stack)
+
+This starts the API along with Prometheus, Grafana, and Locust for monitoring:
+
+```bash
+docker-compose up --build
+```
+
+Services available:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **CardioTrack API** | http://localhost:7860 | Main application with Gradio UI |
+| **Prometheus** | http://localhost:9090 | Metrics collection |
+| **Grafana** | http://localhost:4444 | Metrics dashboard |
+| **Locust** | http://localhost:8089 | Load testing interface |
+
+To stop all services:
+
+```bash
+docker-compose down
+```
+
+> **Important:** For a more in-depth guide, if you want to modify code see the Developer Guide at [docs/Developer_Guide.md](docs/Developer_Guide.md).
+
 
 ## Project Organization
+```
+├── Makefile                                       <- Makefile with convenience commands
+├── README.md                                      <- The top-level README for developers
+├── pyproject.toml                                 <- Project configuration and dependencies
+├── uv.lock                                        <- Lock file for uv package manager
+├── Dockerfile                                     <- Docker container configuration
+├── docker-compose.yml                             <- Multi-service stack (API, Prometheus, Grafana, Locust)
+├── prometheus.yml                                 <- Prometheus scraping configuration
+├── dvc.yaml                                       <- DVC pipeline configuration
+├── dvc.lock                                       <- DVC pipeline lock file
+├── .env.example                                   <- Environment variables template
+├── .dvc/                                          <- DVC internal configuration
+├── .github/workflows/                             <- GitHub Actions CI/CD workflows
+│   ├── deploy.yml                                 <- Deployment workflow
+│   ├── pynblint.yml                               <- Notebook linting workflow
+│   ├── pytestAndGX.yml                            <- Testing and Great Expectations workflow
+│   └── ruff-linter.yml                            <- Ruff code linting workflow
+├── data/
+│   ├── raw/                                       <- Original, immutable data dump
+│   ├── interim/                                   <- Intermediate transformed data
+│   │   └── preprocess_artifacts/                  <- Preprocessing artifacts (scaler.joblib)
+│   └── processed                                  <- Final datasets for modeling (train/test splits)
+├── docs/                                          <- Project documentation
+│   ├── CardioTrack_ML_Canvas.md                   <- ML project canvas
+│   ├── Developer_Guide.md                         <- Developer setup guide
+│   └── Risk_Classification.md                     <- Risk classification methodology
+├── grafana/
+│   ├── dashboards/                                <- Grafana dashboard definitions
+│   └── provisioning/                              <- Datasources and dashboard provisioning
+├── locust/
+│   ├── Dockerfile                                 <- Locust container build
+│   └── locustfile.py                              <- Load-testing scenarios
+├── metrics/test                                   <- Model evaluation metrics (JSON)
+├── models                                         <- Trained models (.joblib files)
+├── notebooks/                                     <- Jupyter notebooks for exploration
+├── references/                                    <- Data dictionaries and explanatory materials
+├── reports/
+│   ├── figures/                                   <- Generated graphics and figures
+│   ├── great_expectations_reports/                <- Data quality validation reports
+│   ├── pytest_report/                             <- Pytest HTML test reports
+│   ├── locust_reports/                            <- Load testing reports
+│   └── deepchecks_data_drift_reports/             <- Data drift analysis outputs
+├── predicting_outcomes_in_heart_failure/          <- Source code
+│   ├── __init__.py
+│   ├── config.py                                  <- Configuration variables
+│   ├── app/                                       <- FastAPI application
+│   │   ├── main.py                                <- Application entry point
+│   │   ├── monitoring.py                          <- Prometheus metrics
+│   │   ├── schema.py                              <- Pydantic schemas
+│   │   ├── utils.py                               <- Utility functions
+│   │   ├── wrapper.py                             <- Wrapper class for UI
+│   │   ├── entrypoint.sh                          <- Container entrypoint script
+│   │   ├── routers/                               <- API route handlers
+│   │   │   ├── cards.py                           <- Cards endpoints
+│   │   │   ├── general.py                         <- General endpoints
+│   │   │   ├── model_info.py                      <- Model info endpoints
+│   │   │   └── prediction.py                      <- Prediction endpoints
+│   │   └── deepchecks_monitoring/                 <- Data drift monitoring
+│   │       ├── drift_runner.py                    <- Drift computation
+│   │       ├── production_data_collector.py       <- Production data logging
+│   │       └── scheduler.py                       <- Scheduled drift jobs
+│   ├── data/                                      <- Data processing modules
+│   │   ├── dataset.py                             <- Data download scripts
+│   │   ├── preprocess.py                          <- Preprocessing code
+│   │   └── split_data.py                          <- Train/test splitting
+│   └── modeling/                                  <- Model training and evaluation
+│       ├── train.py                               <- Training code
+│       ├── predict.py                             <- Inference code
+│       ├── evaluate.py                            <- Evaluation metrics
+│       └── explainability.py                      <- SHAP explainability
+└── tests/                                         <- Test suite
+    ├── test_behavioral_model/                     <- Behavioral testing
+    │   ├── directional_test.py                    <- Directional expectations
+    │   ├── invariance_test.py                     <- Model invariance tests
+    │   └── minimum_functionality_test.py          <- Minimum functionality tests
+    ├── test_heart_data/                           <- Data validation tests
+    │   ├── raw_test.py                            <- Raw data quality tests
+    │   ├── processed_test.py                      <- Processed data quality tests
+    │   └── util.py                                <- Testing utilities
+    └── test_predicting_outcomes_in_heart_failure/ <- Unit tests
+        ├── app/                                   <- API tests
+        │   ├── schema_test.py                     <- Schema validation tests
+        │   └── routers/                           <- Router tests
+        │       ├── model_info_test.py             <- Model info tests
+        │       └── prediction_test.py             <- Prediction tests
+        ├── data/                                  <- Data module tests
+        │   ├── preprocess_test.py                 <- Preprocessing tests
+        │   └── split_data_test.py                 <- Data splitting tests
+        └── modeling/                              <- Modeling tests
+            ├── conftest.py                        <- Pytest fixtures
+            ├── test_train.py                      <- Training tests
+            ├── test_predict.py                    <- Prediction tests
+            ├── test_evaluate.py                   <- Evaluation tests
+            └── test_explainability.py             <- Explainability tests
+```
 
-```
-├── LICENSE            <- Open-source license if one is chosen
-├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
-├── README.md          <- The top-level README for developers using this project.
-├── data
-│   ├── external       <- Data from third party sources.
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-│
-├── docs               <- A default mkdocs project; see www.mkdocs.org for details
-│
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
-│
-├── pyproject.toml     <- Project configuration file with package metadata for 
-│                         predicting_outcomes_in_heart_failure and configuration for tools like black
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.cfg          <- Configuration file for flake8
-│
-└── predicting_outcomes_in_heart_failure   <- Source code for use in this project.
-    │
-    ├── __init__.py             <- Makes predicting_outcomes_in_heart_failure a Python module
-    │
-    ├── config.py               <- Store useful variables and configuration
-    │
-    ├── data               
-    │   ├── __init__.py 
-    │   ├── dataset.py          <- Scripts to download or generate data
-    |   ├── preprocess.py       <- Data preprocessing code 
-    │   └── split_data.py       <- Split dataset into train and test code
-    │
-    ├── features.py             <- Code to create features for modeling
-    │
-    ├── modeling                
-    │   ├── __init__.py 
-    │   ├── predict.py          <- Code to run model inference with trained models          
-    │   └── train.py            <- Code to train models
-    │
-    └── plots.py                <- Code to create visualizations
-```
+## CardioTrack Architecture
+![CardioTrack Architecture](reports/figures/cardiotrack_architecture.png)
 
-## DVC Pipeline defined
-```
-          +---------------+      
-          | download_data |
-          +---------------+
-                  *
-                  *
-                  *
-          +---------------+
-          | preprocessing |
-          +---------------+
-                  *
-                  *
-                  *
-            +------------+
-            | split_data |
-            +------------+
-           ***          ***
-          *                *
-        **                  ***
-+----------+                   *
-| training |                ***
-+----------+               *
-           ***          ***
-              *        *
-               **    **
-            +------------+
-            | evaluation |
-            +------------+
-```
+### DVC Pipeline Defined
+The project implements a **fully automated ML pipeline** using **DVC (Data Version Control)** to ensure reproducibility and traceability across all stages. The pipeline is structured into five sequential stages, each with a specific responsibility in the machine learning workflow.
 
-## Milestones Summary
+1. **download_data**
+Automatically download the raw dataset from Kaggle, eliminating manual download steps and ensuring control of the exact data used.
+2. **preprocessing**
+Applies data transformations including cleaning invalid values, encoding categorical variables, and standardizing numerical features.
+3. **split_data**
+Divides the preprocessed data into **training (70%)** and **test (30%)** sets using stratified sampling. Splitting after preprocessing prevents data leakage by ensuring tuning hyperparameters is computed only on training data.
+4. **training**
+Trains three models (Decision Tree, Random Forest, Logistic Regression) with a **cross-validation strategy** for hyperparameter tuning. **RandomOverSampler** addresses class imbalance.
+5. **evaluation**
+Assesses model performance on the independent test set, computing F1 Score, Recall, Accuracy, and ROC-AUC.
+
+### Experiments
+
+All experiments were tracked using **MLflow** and are available on [DagsHub platform](https://dagshub.com/se4ai2526-uniba/CardioTrack/experiments). For detailed metrics and run comparisons, please refer to the MLflow experiments dashboard.
+
+#### Experimental Setup
+
+We evaluated three classification algorithms:
+
+- **Random Forest**
+- **Decision Tree**
+- **Logistic Regression**
+
+##### Handling Class Imbalance
+
+The target variable presented a significant class imbalance. To address this issue, we applied **Random Oversampling** to balance data, ensuring the models could learn effectively from both classes.
+
+Additionally, the **"sex" feature showed a severe imbalance** in the dataset. After analyzing the model performance with and without this feature, we found that it provided minimal predictive value while potentially introducing unnecessary gender bias. We also trained the models separately on only males and only females, but the performance was very poor, particularly for females. Consequently, we decided to remove the "sex" feature from the final model to ensure fairness without sacrificing performance.
+
+#### Results Summary
+
+| Model | Accuracy | F1 Score | Recall | ROC AUC |
+|-------|----------|----------|--------|---------|
+| **Random Forest** | ~0.87 | ~0.89 | ~0.88 | ~0.91 |
+| Decision Tree | ~0.79 | ~0.75 | ~0.77 | ~0.81 |
+| Logistic Regression | ~0.84 | ~0.81 | ~0.82 | ~0.89 |
+
+#### Selected Model
+
+The model deployed in production is **Random Forest without the "sex" feature**.
+
+| Model | Accuracy | F1 Score | Recall | ROC AUC |
+|-------|----------|----------|--------|---------|
+| **Random Forest No Sex** | 0.8877 | 0.8990 | 0.9020 | 0.9400 |
+
+
+##### Rationale:
+
+1. **Best overall performance**: Random Forest consistently outperformed Decision Tree and Logistic Regression across all metrics.
+
+2. **Fairness considerations**: Removing the "sex" feature eliminates potential gender bias in predictions. The performance difference between the model with all features and the one without "sex" was negligible (< 1%).
+
+3. **Robustness**: Models trained on gender-specific subsets showed highly imbalanced performance, particularly poor results on the female subset due to data scarcity. The model without the "sex" feature generalizes better across both genders.
+
+4. **Ethical AI practices**: In medical applications, avoiding unnecessary use of sensitive attributes aligns with responsible AI principles and regulatory guidelines.
+
+## Milestones Description
 
 ### Milestone 1 - Inception
 During this milestone, the **CCDS Project Template** was used as the foundation for organizing the project.
 The main conceptual and structural components of the system were defined, following the template guidelines to ensure consistency and traceability.
 
-Additionally, a **Machine Learning Canvas** has been added in the [`docs/`](./docs) folder.
+Additionally, a **Machine Learning Canvas** has been added. To see it [docs/CardioTrack_ML_Canvas.md](docs/CardioTrack_ML_Canvas.md).
 It outlines the model objectives, the data to be used, and the key methodological aspects planned for the next phases of the project.
 
 ### Milestone 2 - Reproducibility
@@ -141,7 +271,7 @@ We initialized **DVC** and configured a full pipeline to automate the main steps
 - **Data splitting**
 - **Training** and **evaluation**
 
-The pipeline is fully reproducible and version-controlled through DVC.
+The pipeline is fully reproducible and version-controlled through DVC. Morover, dvc pipeline defined uses `foreach` directive for parallelization across 4 data variants (all, female, male, nosex) and 3 models. All dependencies are automatically tracked ensuring the correct execution order.
 
 #### Model Training and Experiment Tracking
 We implemented the **training scripts** and integrated **MLflow** for experiment tracking.  
@@ -150,7 +280,7 @@ Three models are trained and evaluated within this workflow:
 - Random Forest  
 - Logistic Regression  
 
-Each experiment is logged to MLflow.
+Each experiment is logged to MLflow and they are all available [here](https://dagshub.com/se4ai2526-uniba/CardioTrack.mlflow).
 
 #### Model Registry and Thresholds
 Models that reach or exceed the predefined **performance thresholds** (as defined in the ML Canvas) are automatically **saved to the model registry**.  
@@ -172,10 +302,18 @@ These validations help to:
 
 - detect anomalies or invalid values at the data source
 - prevent the propagation of data issues into downstream processes
+> **Important**: Great Expectation reports are available here [reports/great_expectations_reports](reports/great_expectations_reports)
 
-#### Code Quality
+#### Tests
+
+##### Code Quality
 We added automated **unit and integration tests** using **pytest**, covering the main modules and functionalities of the system.
+> **Important**: Pytest report is available here [reports/pytest_report](reports/pytest_report/)
 
+##### Model Behavioral Testing
+We implemented **behavioral tests** to validate clinical correctness of predictions.
+
+> **Important**: Pytest report is available here [reports/pytest_report](reports/pytest_report/)
 
 #### ML Pipeline Enhancements
  we applied the following enhancements to the ML pipeline:
@@ -197,7 +335,7 @@ We applied an explainability module:
 
 #### Risk Classification
 We added a **Risk Classification** analysis for the system in accordance with **IMDRF** and **AI Act** regulations.
-The documentation is available in the [`docs/`](./docs) folder.
+> **Important**: The Risk Classification is available here: [docs/Risk_Classification.md](docs/Risk_Classification.md) folder.
 
 
 ### Milestone 4 - API Integration
@@ -271,8 +409,48 @@ The overall codebase quality was improved through automated linting and formatti
 - Introduction of *pytest* for automated testing.
 - Integration of *Great Expectations* for automated data quality checks.
 
+**CI Workflows:**
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| ruff-linter.yml | Pull Request | Autofix + push style corrections |
+| pynblint.yml | PR on notebooks/** | Notebook-specific linting |
+| pytestAndGX.yml | PR (excludes main) | Tests + data quality validation |
+| deploy.yml | Push to main | sync → test → deploy to HF |
+
 
 #### Continuos Deployment
 Automated deployment to *Hugging Face* was implemented through Github Actions workflow
 *Hugging Face Space*: [Check Here](https://huggingface.co/spaces/CardioTrack/CardioTrack)
 
+**CD Workflow:**
+1. **test**: Run full test suite
+2. **sync**: Copy files from main to deploy branch
+3. **deploy-to-hf**: Push to HF Space + health check
+
+### Milestone 6 - Monitoring
+
+In this milestone, we implemented:
+
+### Infrastructure
+
+A multi-container monitoring stack was deployed using Docker Compose:
+- **Prometheus** for metrics collection
+- **Grafana** for visualization through a custom dashboard
+- **Locust** for load testing
+
+### Resource Monitoring
+Using the infrastructure defined above, we perform internal resource monitoring:
+- **Prometheus** collects application metrics in real-time
+- **Locust** simulates user traffic to evaluate system performance under load
+- **Grafana** aggregates the most relevant metrics and displays them in a purpose-built dashboard for analysis
+
+Additionally, we use **Uptime - Better Stack** for external uptime monitoring.
+
+### Performance Monitoring
+
+Automated data drift detection was implemented:
+- **APScheduler** for scheduled data collection from production
+- **Deepchecks** for drift analysis on incoming data
+
+> **Important**: Further information about tests and monitoring can be found in [reports/README.md](reports/README.md)
