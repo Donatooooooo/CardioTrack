@@ -33,7 +33,7 @@ app_port: 7860
 
 ## Project Summary
 
-This project develops a complete, reproducible pipeline for predicting patient outcomes in heart failure, leveraging a publicly available clinical dataset. It addresses the challenges of heterogeneous data and ensures consistent preprocessing, model training, and evaluation, with a strong focus on transparency, reliability, and clinical relevance. The system provides explainable predictions and risk classifications, making it both interpretable and trustworthy. A user-friendly interface allows easy interaction with the models, and the entire pipeline is deployed on a publicly accessible [Hugging Face Space](https://huggingface.co/spaces/CardioTrack/CardioTrack), making advanced predictive analytics readily available for clinicians and researchers alike.
+This project develops a complete, reproducible pipeline for predicting patient outcomes in heart failure, leveraging a publicly available clinical dataset. It addresses the challenges of heterogeneous data and ensures consistent preprocessing, model training, and evaluation, with a strong focus on transparency, reliability, and clinical relevance. The system provides explainable predictions and risk classifications, making it both interpretable and trustworthy. A user-friendly interface allows easy interaction with the models, and the entire pipeline is deployed on a publicly accessible [Hugging Face Space](https://huggingface.co/spaces/CardioTrack/CardioTrack). Below, an example of interaction with the system is shown:
 
 ![Hf Space Overview](reports/figures/hf_space_overview.gif)
 
@@ -92,127 +92,99 @@ docker-compose down
 
 ## Project Organization
 ```
-├── Makefile                                        <- Makefile with convenience commands like `make data` or `make train`
-├── README.md                                       <- The top-level README for developers using this project
-├── pyproject.toml                                  <- Project configuration file with package metadata and tool configurations
-├── uv.lock                                         <- Lock file for uv package manager
-├── Dockerfile                                      <- Docker container configuration
-├── docker-compose.yml                              <- Local multi-service stack (API, Prometheus, Grafana, Locust)
-├── prometheus.yml                                  <- Prometheus scraping configuration
-├── dvc.yaml                                        <- DVC pipeline configuration
-├── dvc.lock                                        <- DVC pipeline lock file
-├── .dockerignore
-├── .dvcignore
-├── .gitignore
-├── .env                                            <- Local environment variables
-├── .dvc/                                           <- DVC internal configuration and cache
-│
-├── .github/
-│   └── workflows/                                  <- GitHub Actions CI/CD workflows
-│       ├── deploy.yml                              <- Deployment workflow
-│       ├── pynblint.yml                            <- Notebook linting workflow
-│       ├── pytestAndGX.yml                         <- Testing and Great Expectations workflow
-│       └── ruff-linter.yml                         <- Ruff code linting workflow
-│
+├── Makefile                                       <- Makefile with convenience commands
+├── README.md                                      <- The top-level README for developers
+├── pyproject.toml                                 <- Project configuration and dependencies
+├── uv.lock                                        <- Lock file for uv package manager
+├── Dockerfile                                     <- Docker container configuration
+├── docker-compose.yml                             <- Multi-service stack (API, Prometheus, Grafana, Locust)
+├── prometheus.yml                                 <- Prometheus scraping configuration
+├── dvc.yaml                                       <- DVC pipeline configuration
+├── dvc.lock                                       <- DVC pipeline lock file
+├── .env.example                                   <- Environment variables template
+├── .dvc/                                          <- DVC internal configuration
+├── .github/workflows/                             <- GitHub Actions CI/CD workflows
+│   ├── deploy.yml                                 <- Deployment workflow
+│   ├── pynblint.yml                               <- Notebook linting workflow
+│   ├── pytestAndGX.yml                            <- Testing and Great Expectations workflow
+│   └── ruff-linter.yml                            <- Ruff code linting workflow
 ├── data/
-│   ├── external/                                   <- Data from third party sources
-│   ├── interim/                                    <- Intermediate data that has been transformed
-│   ├── processed/                                  <- The final, canonical data sets for modeling
-│   └── raw/                                        <- The original, immutable data dump
-|   └── monitoring/                                 <- Production inputs and drift monitoring data
-|       └── production_inputs.csv                   <- Collected production samples
-|       └── reports/                                <- Drift analysis outputs (JSON reports)
-│
-├── docs/                                           <- Project documentation
-│   ├── .gitkeep
-│   ├── CardioTrack_ML_Canvas.md                    <- ML project canvas documentation
-│   └── Risk_Classification.md                      <- Risk classification methodology
-│
+│   ├── raw/                                       <- Original, immutable data dump
+│   ├── interim/                                   <- Intermediate transformed data
+│   │   └── preprocess_artifacts/                  <- Preprocessing artifacts (scaler.joblib)
+│   └── processed                                  <- Final datasets for modeling (train/test splits)
+├── docs/                                          <- Project documentation
+│   ├── CardioTrack_ML_Canvas.md                   <- ML project canvas
+│   ├── Developer_Guide.md                         <- Developer setup guide
+│   └── Risk_Classification.md                     <- Risk classification methodology
 ├── grafana/
-│   ├── dashboards/                                 <- Grafana dashboards
-│   └── provisioning/                               <- Grafana datasources and dashboard provisioning
-│
+│   ├── dashboards/                                <- Grafana dashboard definitions
+│   └── provisioning/                              <- Datasources and dashboard provisioning
 ├── locust/
-│   ├── Dockerfile                                  <- Locust container build
-│   └── locustfile.py                               <- Load-testing scenarios for API endpoints
-│
-├── metrics/                                        <- Model performance metrics and evaluation results
-│
-├── models/                                         <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks/                                      <- Jupyter notebooks for exploration and analysis
-│   └── 1.0-mc-initial-data-exploration.ipynb
-│
-├── references/                                     <- Data dictionaries, manuals, and all other explanatory materials
-│
-├── reports/                                        <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   ├── figures/                                    <- Generated graphics and figures to be used in reporting
-│   └── pytest_report.html                          <- Pytest HTML test report
-│
-├── predicting_outcomes_in_heart_failure/           <- Source code for use in this project
+│   ├── Dockerfile                                 <- Locust container build
+│   └── locustfile.py                              <- Load-testing scenarios
+├── metrics/test                                   <- Model evaluation metrics (JSON)
+├── models                                         <- Trained models (.joblib files)
+├── notebooks/                                     <- Jupyter notebooks for exploration
+├── references/                                    <- Data dictionaries and explanatory materials
+├── reports/
+│   ├── figures/                                   <- Generated graphics and figures
+│   ├── great_expectations_reports/                <- Data quality validation reports
+│   ├── pytest_report/                             <- Pytest HTML test reports
+│   ├── locust_reports/                            <- Load testing reports
+│   └── deepchecks_data_drift_reports/             <- Data drift analysis outputs
+├── predicting_outcomes_in_heart_failure/          <- Source code
 │   ├── __init__.py
-│   ├── config.py                                   <- Store useful variables and configuration
-│   │
-│   ├── app/                                        <- FastAPI application code
-│   │   ├── __init__.py
-│   │   ├── main.py                                 <- FastAPI application entry point
-|   |   ├── monitoring.py                           <- Promtheus metrics for monitoring
-│   │   ├── schema.py                               <- Pydantic schemas for API validation
-│   │   ├── utils.py                                <- Utility functions for the API
-│   │   ├── wrapper.py                              <- Wrapper class for UI
-│   │   ├── entrypoint.sh                           <- Container entrypoint script
-│   │   │
-│   │   ├── routers/                                <- API route handlers
-│   │   │   ├── cards.py                            <- Cards-related endpoints
-│   │   │   ├── general.py                          <- General API endpoints
-│   │   │   ├── model_info.py                       <- Model information endpoints
-│   │   │   └── prediction.py                       <- Prediction endpoints
-│   │   │
-│   │   └──deepchecks_monitoring/                   <- Data drift monitoring logic
-│   │       ├──drift_runner.py                      <- Drift computation
-│   │       ├──production_data_collector.py         <- Production data logging
-│   │       └──scheduler.py                         <- Scheduled drift jobs
-│   │
-│   ├── data/                                       <- Data processing modules
-│   │   ├── dataset.py                              <- Scripts to download or generate data
-│   │   ├── preprocess.py                           <- Data preprocessing code
-│   │   └── split_data.py                           <- Split dataset into train and test code
-│   │
-│   └── modeling/                                   <- Model training and evaluation
-│       ├── __init__.py
-│       ├── train.py                                <- Code to train models
-│       ├── predict.py                              <- Code to run model inference with trained models
-│       ├── evaluate.py                             <- Model evaluation metrics and reports
-│       └── explainability.py                       <- Model interpretability and explainability code
-│
-└── tests/                                          <- Test suite for the project
-    ├── test_behavioral_model/                      <- Behavioral testing for model robustness
-    │   ├── directional_test.py                     <- Tests for directional expectations
-    │   ├── invariance_test.py                      <- Tests for model invariance
-    │   └── minimum_functionality_test.py           <- Minimum functionality requirements
-    │
-    ├── test_heart_data/                            <- Data validation tests
-    │   ├── raw_test.py                             <- Tests for raw data quality
-    │   ├── processed_test.py                       <- Tests for processed data quality
-    │   └── util.py                                 <- Testing utilities
-    │
-    └── test_predicting_outcomes_in_heart_failure/  <- Unit tests for source code
-        ├── app/                                    <- API tests
-        │   ├── schema_test.py                      <- Schema validation tests
-        │   └── routers/
-        │       ├── model_info_test.py              <- Model info endpoint tests
-        │       └── prediction_test.py              <- Prediction endpoint tests
-        │
-        ├── data/                                   <- Data module tests
-        │   ├── preprocess_test.py                  <- Preprocessing tests
-        │   └── split_data_test.py                  <- Data splitting tests
-        │
-        └── modeling/                               <- Modeling module tests
-            ├── conftest.py                         <- Pytest configuration and fixtures
-            ├── test_train.py                       <- Training pipeline tests
-            ├── test_predict.py                     <- Prediction tests
-            ├── test_evaluate.py                    <- Evaluation tests
-            └── test_explainability.py              <- Explainability tests
+│   ├── config.py                                  <- Configuration variables
+│   ├── app/                                       <- FastAPI application
+│   │   ├── main.py                                <- Application entry point
+│   │   ├── monitoring.py                          <- Prometheus metrics
+│   │   ├── schema.py                              <- Pydantic schemas
+│   │   ├── utils.py                               <- Utility functions
+│   │   ├── wrapper.py                             <- Wrapper class for UI
+│   │   ├── entrypoint.sh                          <- Container entrypoint script
+│   │   ├── routers/                               <- API route handlers
+│   │   │   ├── cards.py                           <- Cards endpoints
+│   │   │   ├── general.py                         <- General endpoints
+│   │   │   ├── model_info.py                      <- Model info endpoints
+│   │   │   └── prediction.py                      <- Prediction endpoints
+│   │   └── deepchecks_monitoring/                 <- Data drift monitoring
+│   │       ├── drift_runner.py                    <- Drift computation
+│   │       ├── production_data_collector.py       <- Production data logging
+│   │       └── scheduler.py                       <- Scheduled drift jobs
+│   ├── data/                                      <- Data processing modules
+│   │   ├── dataset.py                             <- Data download scripts
+│   │   ├── preprocess.py                          <- Preprocessing code
+│   │   └── split_data.py                          <- Train/test splitting
+│   └── modeling/                                  <- Model training and evaluation
+│       ├── train.py                               <- Training code
+│       ├── predict.py                             <- Inference code
+│       ├── evaluate.py                            <- Evaluation metrics
+│       └── explainability.py                      <- SHAP explainability
+└── tests/                                         <- Test suite
+    ├── test_behavioral_model/                     <- Behavioral testing
+    │   ├── directional_test.py                    <- Directional expectations
+    │   ├── invariance_test.py                     <- Model invariance tests
+    │   └── minimum_functionality_test.py          <- Minimum functionality tests
+    ├── test_heart_data/                           <- Data validation tests
+    │   ├── raw_test.py                            <- Raw data quality tests
+    │   ├── processed_test.py                      <- Processed data quality tests
+    │   └── util.py                                <- Testing utilities
+    └── test_predicting_outcomes_in_heart_failure/ <- Unit tests
+        ├── app/                                   <- API tests
+        │   ├── schema_test.py                     <- Schema validation tests
+        │   └── routers/                           <- Router tests
+        │       ├── model_info_test.py             <- Model info tests
+        │       └── prediction_test.py             <- Prediction tests
+        ├── data/                                  <- Data module tests
+        │   ├── preprocess_test.py                 <- Preprocessing tests
+        │   └── split_data_test.py                 <- Data splitting tests
+        └── modeling/                              <- Modeling tests
+            ├── conftest.py                        <- Pytest fixtures
+            ├── test_train.py                      <- Training tests
+            ├── test_predict.py                    <- Prediction tests
+            ├── test_evaluate.py                   <- Evaluation tests
+            └── test_explainability.py             <- Explainability tests
 ```
 
 ## CardioTrack Architecture
@@ -330,7 +302,7 @@ These validations help to:
 
 - detect anomalies or invalid values at the data source
 - prevent the propagation of data issues into downstream processes
-> **Important**: Great Expectation reports are available here [reports/great_expectation_reports](reports/great_expectation_reports)
+> **Important**: Great Expectation reports are available here [reports/great_expectations_reports](reports/great_expectations_reports)
 
 #### Tests
 
