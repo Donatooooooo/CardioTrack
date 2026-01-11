@@ -123,6 +123,24 @@ CARD_PATHS = {
     "model_card": MODELS_DIR / "README.md",
 }
 
+MONITORING_DIR = DATA_DIR / "monitoring"
+PRODUCTION_CSV_PATH = MONITORING_DIR / "production_inputs.csv"
+REFERENCE_CSV = PROCESSED_DATA_DIR / "nosex" / "train.csv"
+REPORTS_DIR = MONITORING_DIR / "reports"
+STATE_PATH = MONITORING_DIR / "state.json"
+
+CAT_FEATURES = [
+    "ChestPainType_ASY",
+    "ChestPainType_ATA",
+    "ChestPainType_NAP",
+    "ChestPainType_TA",
+    "RestingECG_LVH",
+    "RestingECG_Normal",
+    "RestingECG_ST",
+    "ST_Slope_Down",
+    "ST_Slope_Flat",
+    "ST_Slope_Up",
+]
 # ----------------------------
 # API
 # ----------------------------

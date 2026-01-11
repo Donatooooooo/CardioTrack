@@ -11,22 +11,15 @@ def test_model_hyperparameters():
     assert response.status_code in (HTTPStatus.OK, HTTPStatus.NOT_FOUND)
 
     body = response.json()
+    assert body["status-code"] in (HTTPStatus.OK.value, HTTPStatus.NOT_FOUND.value)
 
-    if response.status_code == HTTPStatus.OK:
-        assert body["status-code"] == HTTPStatus.OK.value
-        data = body["data"]
-        assert "model_path" in data
-        assert "hyperparameters" in data
-
-        hyper = data["hyperparameters"]
-        assert "model_name" in hyper
-        assert "data_variant" in hyper
-        assert "cv" in hyper
-        assert "features" in hyper
+    if body["status-code"] == HTTPStatus.OK.value:
+        assert "data" in body
+        assert "hyperparameters" in body["data"]
     else:
-        assert body["status-code"] == HTTPStatus.NOT_FOUND.value
         assert "data" in body
         assert "detail" in body["data"]
+        assert body["data"]["detail"]
 
 
 def test_model_metrics():

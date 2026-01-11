@@ -11,16 +11,15 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    needs: sync
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: deploy 
+          ref: main
           fetch-depth: 0
 
       - uses: astral-sh/setup-uv@v3
-      
+
       - name: Cache uv
         uses: actions/cache@v4
         with:
@@ -28,7 +27,7 @@ jobs:
           key: uv-${{ runner.os }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
 
       - name: Sync dependencies
-        run: uv sync          
+        run: uv sync
 
       - name: Configure DVC credentials
         run: |
@@ -52,9 +51,10 @@ jobs:
           uv run python tests/test_heart_data/processed_test.py
 
   sync:
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout deploy
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -64,11 +64,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           BRANCH="deploy"
-          
+
           ITEMS=(
-            "predict_outcomes_in_heart_failure"
+            "predicting_outcomes_in_heart_failure"
             "pyproject.toml"
             "uv.lock"
             "dvc.yaml"
@@ -76,6 +76,7 @@ jobs:
             "dvc.lock"
             "README.md"
             "Dockerfile"
+            "prometheus.yml"
           )
 
           mkdir -p /tmp/to-deploy
@@ -88,8 +89,7 @@ jobs:
 
           git fetch origin $BRANCH
           git checkout $BRANCH
-          
-          # Copy items from /tmp to current directory
+
           for item in "${ITEMS[@]}"; do
             if [ -e "/tmp/to-deploy/$item" ]; then
               rm -rf "./$item"
@@ -97,8 +97,7 @@ jobs:
               cp -r "/tmp/to-deploy/$item" "./$item"
             fi
           done
-          
-          # Commit e push
+
           git add .
           if git diff --staged --quiet; then
             echo "No changes to commit."
@@ -108,9 +107,9 @@ jobs:
           fi
 
   deploy-to-hf:
-    needs: [sync, test]
-    runs-on: ubuntu-latest 
-    
+    needs: sync
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -126,28 +125,32 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrack
+          git remote add hf https://user:$HF_TOKEN@huggingface.co/spaces/CardioTrack/CardioTrackTest
           git push hf deploy:main --force
-      
-      - name: Sleep before checking deployment
-        run: sleep 600
 
-      - name: Check deployment status on Hugging Face
+      - name: Wait for HF Space to be ready
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           pip install huggingface-hub
           python -c "
-          from huggingface_hub import HfApi, login
-          login(token='${{ secrets.HF_TOKEN }}')
-          api = HfApi()
-          info = api.space_info('CardioTrack/CardioTrack')
-          print(f'Stage: {info.runtime.stage}')
-          if info.runtime.stage == 'ERROR' or info.runtime.stage == 'BUILD_ERROR':
-              print('Deployment failed!')
-              exit(1)
-          else:
-              print('Deployment successful and running.')
+          import time
+          import sys
+          from huggingface_hub import HfApi
+          api = HfApi(token='${{ secrets.HF_TOKEN }}')
+          space_id = 'CardioTrack/CardioTrackTest'
+          max_wait = 600
+          poll_interval = 30
+          elapsed = 0
+          while elapsed < max_wait:
+              info = api.space_info(space_id)
+              stage = info.runtime.stage if info.runtime else 'UNKNOWN'
+              if stage == 'RUNNING':
+                  sys.exit(0)
+              elif stage in ('BUILD_ERROR', 'RUNTIME_ERROR', 'CONFIG_ERROR'):
+                  print(f'Deployment failed with stage: {stage}')
+                  sys.exit(1)
+              time.sleep(poll_interval)
+              elapsed += poll_interval
+          sys.exit(1)
           "
-    
-          

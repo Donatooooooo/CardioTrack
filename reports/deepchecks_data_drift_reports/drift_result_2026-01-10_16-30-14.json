@@ -1,0 +1,36 @@
+{
+  "check": "FeatureDrift",
+  "timestamp_utc": "2026-01-10T16:30:14.110650+00:00",
+  "data": {
+    "reference_rows": 641,
+    "production_rows": 33
+  },
+  "features": {
+    "Age": 0.07199924360610788,
+    "RestingBP": 0.15766085188862106,
+    "Cholesterol": 0.11733560251500968,
+    "FastingBS": 0.07625395924927914,
+    "MaxHR": 0.24478797333711533,
+    "ExerciseAngina": 0.10726610882617127,
+    "Oldpeak": 0.08920720465182241,
+    "ChestPainType_ASY": 0.0,
+    "ChestPainType_ATA": 0.0,
+    "ChestPainType_NAP": 0.0,
+    "ChestPainType_TA": 0.0,
+    "RestingECG_LVH": 0.0,
+    "RestingECG_Normal": 0.0,
+    "RestingECG_ST": 0.0,
+    "ST_Slope_Down": 0.0,
+    "ST_Slope_Flat": 0.09076546348089813,
+    "ST_Slope_Up": 0.08781783137468689
+  },
+  "summary": {
+    "max_drift": 0.24478797333711533,
+    "mean_drift": 0.06135848464292422,
+    "threshold": 0.2,
+    "features_above_threshold": [
+      "MaxHR"
+    ],
+    "n_features_above_threshold": 1
+  }
+}
